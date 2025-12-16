@@ -9,10 +9,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +23,8 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.TextObfuscationMode
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -59,6 +63,7 @@ import pdm.unindubria.stormbringer.ui.theme.Pink40
 import pdm.unindubria.stormbringer.ui.theme.StormbringerTheme
 import pdm.unindubria.stormbringer.ui.theme.glow_active
 import pdm.unindubria.stormbringer.ui.theme.glow_subtle
+import pdm.unindubria.stormbringer.ui.theme.stormbringer_background_dark
 import pdm.unindubria.stormbringer.ui.theme.stormbringer_input_bg
 import pdm.unindubria.stormbringer.ui.theme.stormbringer_primary
 import pdm.unindubria.stormbringer.ui.theme.stormbringer_primary_dark
@@ -183,13 +188,65 @@ fun StormbringerHome(){
                 errorSuffixColor = Pink40
             )
             InputRender(
-                hint = "mage@stormbringer.rpg", text = "Email address",
-                tint = white_20, leadingIcon = R.drawable.mail_24px, colors = inputStyling
+                type = "email" ,hint = "mage@stormbringer.rpg", text = "Email address",
+                leadingIcon = R.drawable.mail_24px, colors = inputStyling
             )
 
-            InputRender(type = "Passowrd", hint = "******", text = "Password",
-                tint = white_20, leadingIcon = R.drawable.lock_24px, trailingIcon = R.drawable.visibility_24px, trailingIcon_filled = R.drawable.visibility_off_24px, colors = inputStyling
+            InputRender(type = "password", hint = "******", text = "Password",
+                leadingIcon = R.drawable.lock_24px, trailingIcon = R.drawable.visibility_24px, trailingIcon_filled = R.drawable.visibility_off_24px, colors = inputStyling
             )
+
+            Text(
+                text = stringResource(R.string.forgot_password_string),
+                style = MaterialTheme.typography.bodyLarge,
+                color = white_100,
+                modifier = Modifier.padding(top = 8.dp).clickable(onClick = { forgottenPassword() })
+            )
+
+            Spacer(modifier = Modifier.padding(16.dp))
+            Box(
+
+                modifier = Modifier
+                    .innerShadow(
+                        shape = RoundedCornerShape(16.dp),
+                        shadow = Shadow(
+                            color = glow_subtle,
+                            spread = 1.dp,
+                            radius = 16.dp,
+                            //offset = DpOffset(x=0.dp,y=1.5.dp)
+                        )
+                    )
+                    .dropShadow(
+                        shape = RoundedCornerShape(16.dp),
+                        shadow = Shadow(
+                            color = glow_subtle,
+                            spread = 1.dp,
+                            radius = 16.dp,
+                            //offset = DpOffset(x=0.dp,1.5.dp)
+                        )
+                    ),
+                contentAlignment = Alignment.Center,
+                propagateMinConstraints = true,
+                content = {
+                    Button(
+                        enabled = true,
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonColors(
+                            containerColor = stormbringer_primary,
+                            contentColor = stormbringer_background_dark,
+                            disabledContainerColor = white_20,
+                            disabledContentColor = white_20
+                        ),
+
+                        onClick = {},
+                        modifier = Modifier.padding(),
+                        content = {
+                            Text(text = stringResource(R.string.Enter_button), style = MaterialTheme.typography.headlineSmall, color = stormbringer_surface_dark, modifier = Modifier.padding(16.dp))
+                        }
+                    )
+                }
+            )
+
         }
     }
 }
@@ -197,7 +254,7 @@ fun StormbringerHome(){
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun InputRender(type: String = "Email", hint: String = "mage@stormbringer.rpg", text: String = "Email address", tint: Color = white_100, leadingIcon: Int ?= null, trailingIcon: Int ?= null, trailingIcon_filled: Int ?= null, colors: TextFieldColors ?= null){
+fun InputRender(type: String = "Email", hint: String = "mage@stormbringer.rpg", text: String = "Email address",  leadingIcon: Int ?= null, trailingIcon: Int ?= null, trailingIcon_filled: Int ?= null, colors: TextFieldColors ?= null){
 
 
     Column(
@@ -208,10 +265,9 @@ fun InputRender(type: String = "Email", hint: String = "mage@stormbringer.rpg", 
         Text(
             text,
             modifier = Modifier.padding(horizontal = 5.dp, vertical = 0.dp),
-            color = tint
         )
 
-        if(type == "Email"){
+        if(type == "email"){
             var value =rememberTextFieldState(initialText = "")
             TextField (
 
@@ -228,7 +284,7 @@ fun InputRender(type: String = "Email", hint: String = "mage@stormbringer.rpg", 
                         Icon(
                             painter = painterResource(id = leadingIcon),
                             contentDescription = "leadingIcon",
-                            tint = tint)
+                            )
 
                 },
                 trailingIcon = @Composable {
@@ -236,7 +292,7 @@ fun InputRender(type: String = "Email", hint: String = "mage@stormbringer.rpg", 
                         Icon(
                             painter = painterResource(id = trailingIcon),
                             contentDescription = "trailingIcon",
-                            tint = tint)
+                            )
                 },
                 shape = RoundedCornerShape(16.dp),
                 colors = colors!!,
@@ -259,7 +315,7 @@ fun InputRender(type: String = "Email", hint: String = "mage@stormbringer.rpg", 
                         Icon(
                             painter = painterResource(id = leadingIcon),
                             contentDescription = "leadingIcon",
-                            tint = tint)
+                            )
 
                 },
                 trailingIcon = @Composable {
@@ -271,12 +327,12 @@ fun InputRender(type: String = "Email", hint: String = "mage@stormbringer.rpg", 
                                         Icon(
                                             painter = painterResource(id = trailingIcon),
                                             contentDescription = "leadingIcon",
-                                            tint = tint)
+                                            )
                                     }else{
                                         Icon(
                                             painter = painterResource(id = trailingIcon_filled),
                                             contentDescription = "leadingIcon",
-                                            tint = tint)
+                                            )
                                     }
                                 visibilityIcon
                             }
@@ -296,3 +352,4 @@ fun InputRender(type: String = "Email", hint: String = "mage@stormbringer.rpg", 
 }
 
 
+fun forgottenPassword(){}

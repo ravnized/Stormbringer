@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="stormbringer_primary">#FFAB00</color>
+    <color name="stormbringer_primary_dark">#D48B00</color>
+
+    <!-- backgrounds  surfaces -->
+    <color name="stormbringer_background_light">#F6F8F7</color>
+    <color name="stormbringer_background_dark">#121212</color>
+    <color name="stormbringer_surface_dark">#1E1E1E</color>
+    <color name="stormbringer_input_bg">#2C2C2C</color>
+
+    <!-- Text & Icon Colors (White Opacities) -->
+    <color name="white_05">#0DFFFFFF</color> <!-- 5% -->
+    <color name="white_10">#1AFFFFFF</color> <!-- 10% -->
+    <color name="white_20">#33FFFFFF</color> <!-- 20% -->
+    <color name="white_30">#4DFFFFFF</color> <!-- 30% -->
+    <color name="white_40">#66FFFFFF</color> <!-- 40% -->
+    <color name="white_50">#80FFFFFF</color> <!-- 50% -->
+    <color name="white_60">#99FFFFFF</color> <!-- 60% -->
+    <color name="white_70">#B3FFFFFF</color> <!-- 70% -->
+    <color name="white_90">#E6FFFFFF</color> <!-- 90% -->
+    <color name="white_100">#FFFFFFFF</color>
+
+    <!-- Overlay Colors (Black Opacities) -->
+    <color name="black_20">#33000000</color>
+
+    <!-- Effect Colors (Glows based on Primary) -->
+    <color name="glow_subtle">#26FFAB00</color> <!-- 15% -->
+    <color name="glow_normal">#40FFAB00</color> <!-- 25% -->
+    <color name="glow_active">#59FFAB00</color> <!-- 35% -->
+    <color name="glow_ambient">#1AFFAB00</color> <!-- 10% used in ambient blurs -->
+
+    <!-- Ambient Colors -->
+    <color name="orange_900_20">#337C2D12</color> <!-- Approximate orange-900 at 20% -->
+</resources>

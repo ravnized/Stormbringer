@@ -46,6 +46,7 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -59,6 +60,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import pdm.unindubria.stormbringer.tools.UserAction
 import pdm.unindubria.stormbringer.ui.theme.Pink40
 import pdm.unindubria.stormbringer.ui.theme.StormbringerTheme
 import pdm.unindubria.stormbringer.ui.theme.glow_active
@@ -93,6 +95,9 @@ fun StormbringerHome(){
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
+        val instance = UserAction()
+        val valueEmail =rememberTextFieldState(initialText = "")
+        val valuePassword =rememberTextFieldState(initialText = "")
         Column(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -188,11 +193,11 @@ fun StormbringerHome(){
                 errorSuffixColor = Pink40
             )
             InputRender(
-                type = "email" ,hint = "mage@stormbringer.rpg", text = "Email address",
+                type = "email" , state = valueEmail,hint = stringResource(R.string.email_hint), text = stringResource(R.string.email_key),
                 leadingIcon = R.drawable.mail_24px, colors = inputStyling
             )
 
-            InputRender(type = "password", hint = "******", text = "Password",
+            InputRender(type = "password", state = valuePassword ,hint = "******", text = stringResource(R.string.password_key),
                 leadingIcon = R.drawable.lock_24px, trailingIcon = R.drawable.visibility_24px, trailingIcon_filled = R.drawable.visibility_off_24px, colors = inputStyling
             )
 
@@ -238,7 +243,12 @@ fun StormbringerHome(){
                             disabledContentColor = white_20
                         ),
 
-                        onClick = {},
+                        onClick = {
+
+                            register(instance, email = valueEmail.text.toString(), password = valuePassword.text.toString())
+
+
+                        },
                         modifier = Modifier.padding(),
                         content = {
                             Text(text = stringResource(R.string.Enter_button), style = MaterialTheme.typography.headlineSmall, color = stormbringer_surface_dark, modifier = Modifier.padding(16.dp))
@@ -252,9 +262,9 @@ fun StormbringerHome(){
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
+//@Preview
 @Composable
-fun InputRender(type: String = "Email", hint: String = "mage@stormbringer.rpg", text: String = "Email address",  leadingIcon: Int ?= null, trailingIcon: Int ?= null, trailingIcon_filled: Int ?= null, colors: TextFieldColors ?= null){
+fun InputRender(type: String = "Email",state: TextFieldState = rememberTextFieldState(initialText = ""), hint: String = "mage@stormbringer.rpg", text: String = "Email address",  leadingIcon: Int ?= null, trailingIcon: Int ?= null, trailingIcon_filled: Int ?= null, colors: TextFieldColors ?= null){
 
 
     Column(
@@ -268,7 +278,7 @@ fun InputRender(type: String = "Email", hint: String = "mage@stormbringer.rpg", 
         )
 
         if(type == "email"){
-            var value =rememberTextFieldState(initialText = "")
+
             TextField (
 
                 placeholder = {
@@ -278,7 +288,7 @@ fun InputRender(type: String = "Email", hint: String = "mage@stormbringer.rpg", 
                     )
                 },
                 lineLimits = TextFieldLineLimits.SingleLine,
-                state = value,
+                state = state,
                 leadingIcon = @Composable {
                     if(leadingIcon != null)
                         Icon(
@@ -299,10 +309,9 @@ fun InputRender(type: String = "Email", hint: String = "mage@stormbringer.rpg", 
                 modifier = Modifier.padding()
             )
         }else {
-            val value: TextFieldState = rememberTextFieldState(initialText = "")
             var passwordHidden by rememberSaveable { mutableStateOf(true) }
             SecureTextField(
-                state = value,
+                state = state,
                 placeholder = { Text(hint, color = white_20) },
                 textObfuscationMode =
                     if (passwordHidden) TextObfuscationMode.RevealLastTyped
@@ -353,3 +362,7 @@ fun InputRender(type: String = "Email", hint: String = "mage@stormbringer.rpg", 
 
 
 fun forgottenPassword(){}
+
+fun register(instance: UserAction,email: String, password: String){
+    instance.registerUser(email=email, pass = password)
+}

@@ -1,4 +1,5 @@
-package pdm.uninsubria.stormbringer
+package pdm.uninsubria.stormbringer.ui.activity
+
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -36,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.UserAction
 import pdm.uninsubria.stormbringer.ui.theme.AlertDialogRegister
 import pdm.uninsubria.stormbringer.ui.theme.InputEmail
@@ -47,8 +49,9 @@ import pdm.uninsubria.stormbringer.ui.theme.stormbringer_surface_dark
 import pdm.uninsubria.stormbringer.ui.theme.white_100
 import pdm.uninsubria.stormbringer.ui.theme.white_20
 
+
 @Composable
-fun StormbringerLogin() {
+fun StormbringerRegister() {
     Surface(
         modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
     ) {
@@ -123,7 +126,7 @@ fun StormbringerLogin() {
 
 
                 Text(
-                    text = stringResource(R.string.login_title),
+                    text = stringResource(R.string.register_title),
                     style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.padding(16.dp)
                 )
@@ -177,7 +180,7 @@ fun StormbringerLogin() {
 
                         onClick = {
                             scope.launch {
-                                val success = userAction.loginUser(
+                                val success = userAction.registerUser(
                                     email = valueEmail.text.toString(),
                                     pass = valuePassword.text.toString()
                                 )
@@ -195,7 +198,7 @@ fun StormbringerLogin() {
 
                         }, modifier = Modifier.padding(), content = {
                             Text(
-                                text = stringResource(R.string.login_button),
+                                text = stringResource(R.string.register_button),
                                 style = MaterialTheme.typography.headlineSmall,
                                 color = stormbringer_surface_dark,
                                 modifier = Modifier.padding(16.dp)
@@ -212,3 +215,4 @@ fun StormbringerLogin() {
         }
     }
 }
+

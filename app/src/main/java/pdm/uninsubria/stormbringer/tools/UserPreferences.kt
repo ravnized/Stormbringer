@@ -1,4 +1,4 @@
-package pdm.unindubria.stormbringer.tools
+package pdm.uninsubria.stormbringer.tools
 
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey

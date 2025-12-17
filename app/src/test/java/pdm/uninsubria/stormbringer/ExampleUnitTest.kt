@@ -1,4 +1,4 @@
-package pdm.unindubria.stormbringer
+package pdm.uninsubria.stormbringer
 
 import org.junit.Test
 

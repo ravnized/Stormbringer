@@ -1,4 +1,4 @@
-package pdm.unindubria.stormbringer
+package pdm.uninsubria.stormbringer
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

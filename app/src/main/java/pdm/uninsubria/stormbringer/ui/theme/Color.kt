@@ -1,4 +1,4 @@
-package pdm.unindubria.stormbringer.ui.theme
+package pdm.uninsubria.stormbringer.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

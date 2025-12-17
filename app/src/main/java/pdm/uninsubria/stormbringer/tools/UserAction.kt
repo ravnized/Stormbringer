@@ -1,4 +1,4 @@
-package pdm.unindubria.stormbringer.tools
+package pdm.uninsubria.stormbringer.tools
 
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth

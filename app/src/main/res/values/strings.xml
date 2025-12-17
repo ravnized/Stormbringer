@@ -5,7 +5,8 @@
     <string name="password_hint" translatable="false">12345678</string>
     <string name="password_key">password</string>
     <string name="forgot_password_string">Forgot Password?</string>
-    <string name="Enter_button">Enter the void</string>
+    <string name="register_button">Seal the Pact</string>
+    <string name="login_button">Enter the void</string>
     <string name="continue_text">or continue with</string>
     <string name="path_selector_text">Choose your Path</string>
     <string name="player_mode_title">Player Mode</string>

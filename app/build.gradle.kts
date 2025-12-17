@@ -6,13 +6,13 @@ plugins {
 }
 
 android {
-    namespace = "pdm.unindubria.stormbringer"
+    namespace = "pdm.uninsubria.stormbringer"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "pdm.unindubria.stormbringer"
+        applicationId = "pdm.uninsubria.stormbringer"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

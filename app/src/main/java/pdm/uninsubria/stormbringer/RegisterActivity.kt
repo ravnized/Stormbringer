@@ -1,8 +1,6 @@
-package pdm.unindubria.stormbringer
+package pdm.uninsubria.stormbringer
 
 
-import androidx.compose.ui.graphics.Color
-import android.graphics.drawable.Icon
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -31,22 +29,15 @@ import androidx.compose.material3.IconButton
 
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.SecureTextField
 
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.TooltipAnchorPosition
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -58,24 +49,23 @@ import androidx.compose.ui.graphics.shadow.Shadow
 
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import pdm.unindubria.stormbringer.tools.UserAction
-import pdm.unindubria.stormbringer.ui.theme.Pink40
-import pdm.unindubria.stormbringer.ui.theme.StormbringerTheme
-import pdm.unindubria.stormbringer.ui.theme.glow_active
-import pdm.unindubria.stormbringer.ui.theme.glow_subtle
-import pdm.unindubria.stormbringer.ui.theme.stormbringer_background_dark
-import pdm.unindubria.stormbringer.ui.theme.stormbringer_input_bg
-import pdm.unindubria.stormbringer.ui.theme.stormbringer_primary
-import pdm.unindubria.stormbringer.ui.theme.stormbringer_primary_dark
-import pdm.unindubria.stormbringer.ui.theme.stormbringer_surface_dark
-import pdm.unindubria.stormbringer.ui.theme.white_05
-import pdm.unindubria.stormbringer.ui.theme.white_100
-import pdm.unindubria.stormbringer.ui.theme.white_20
-import pdm.unindubria.stormbringer.ui.theme.white_40
-import pdm.unindubria.stormbringer.ui.theme.white_60
-import pdm.unindubria.stormbringer.ui.theme.white_70
+import pdm.uninsubria.stormbringer.tools.UserAction
+import pdm.uninsubria.stormbringer.ui.theme.Pink40
+import pdm.uninsubria.stormbringer.ui.theme.StormbringerTheme
+import pdm.uninsubria.stormbringer.ui.theme.glow_active
+import pdm.uninsubria.stormbringer.ui.theme.glow_subtle
+import pdm.uninsubria.stormbringer.ui.theme.stormbringer_background_dark
+import pdm.uninsubria.stormbringer.ui.theme.stormbringer_input_bg
+import pdm.uninsubria.stormbringer.ui.theme.stormbringer_primary
+import pdm.uninsubria.stormbringer.ui.theme.stormbringer_primary_dark
+import pdm.uninsubria.stormbringer.ui.theme.stormbringer_surface_dark
+import pdm.uninsubria.stormbringer.ui.theme.white_05
+import pdm.uninsubria.stormbringer.ui.theme.white_100
+import pdm.uninsubria.stormbringer.ui.theme.white_20
+import pdm.uninsubria.stormbringer.ui.theme.white_40
+import pdm.uninsubria.stormbringer.ui.theme.white_60
+import pdm.uninsubria.stormbringer.ui.theme.white_70
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -251,7 +241,7 @@ fun StormbringerHome(){
                         },
                         modifier = Modifier.padding(),
                         content = {
-                            Text(text = stringResource(R.string.Enter_button), style = MaterialTheme.typography.headlineSmall, color = stormbringer_surface_dark, modifier = Modifier.padding(16.dp))
+                            Text(text = stringResource(R.string.register_button), style = MaterialTheme.typography.headlineSmall, color = stormbringer_surface_dark, modifier = Modifier.padding(16.dp))
                         }
                     )
                 }

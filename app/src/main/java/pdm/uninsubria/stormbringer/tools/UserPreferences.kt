@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 
@@ -20,6 +21,9 @@ class UserPreferences(private val context: Context) {
         val UNIQUE_ID_KEY = intPreferencesKey("unique_id")
 
         val LOGGED_KEY = booleanPreferencesKey("logged")
+
+        val ALERT_KEY = booleanPreferencesKey("alert")
+
     }
 
 
@@ -37,6 +41,11 @@ class UserPreferences(private val context: Context) {
 
     val logged: Flow<Boolean> = context.dataStore.data
         .map {  preferences -> preferences[LOGGED_KEY] ?: false }
+
+    val alert: Flow<Boolean> = context.dataStore.data
+        .map {  preferences -> preferences[ALERT_KEY] ?: false }
+
+
 
     suspend fun savePreferencesBoolean(value: Boolean, key: String){
         val dataStoreKey = booleanPreferencesKey(key)
@@ -58,6 +67,22 @@ class UserPreferences(private val context: Context) {
         context.dataStore.edit { preferences ->
             preferences[dataStoreKey] = value
         }
+    }
+
+    suspend fun getPreferencesString(key: String){
+        val dataStoreKey = stringPreferencesKey(key)
+        context.dataStore.edit {
+            preferences -> preferences[dataStoreKey]
+        }
+    }
+
+    suspend fun getPreferencesBoolean(key: String): Boolean{
+        val dataStoreKey = booleanPreferencesKey(key)
+
+        return context.dataStore.data.map {
+            preferences -> preferences[dataStoreKey] ?: false
+        }.first()
+
     }
 
 

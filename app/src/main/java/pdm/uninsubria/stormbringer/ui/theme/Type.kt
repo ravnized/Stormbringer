@@ -30,14 +30,21 @@ val Typography = Typography(
         lineHeight = 28.sp,
         letterSpacing = 0.sp
     ),
+    headlineMedium = TextStyle(
+        fontFamily = MedievalSharp,
+        fontWeight = FontWeight.Normal,
+        fontSize = 28.sp,
+        lineHeight = 28.sp,
+        letterSpacing = 0.sp
+    ),
 
-            headlineSmall = TextStyle(
-            fontFamily = MedievalSharp,
-    fontWeight = FontWeight.Normal,
-    fontSize = 24.sp,
-    lineHeight = 28.sp,
-    letterSpacing = 0.sp
-)
+    headlineSmall = TextStyle(
+        fontFamily = MedievalSharp,
+        fontWeight = FontWeight.Normal,
+        fontSize = 24.sp,
+        lineHeight = 28.sp,
+        letterSpacing = 0.sp
+    )
 )
 
 

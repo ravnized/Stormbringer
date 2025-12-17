@@ -1,9 +1,11 @@
 <resources>
     <string name="app_name">Stormbringer</string>
+    <string name="register_title">Register</string>
+    <string name="login_title">Login</string>
     <string name="email_key">Email Address</string>
     <string name="email_hint">mage@stormbringer.rpg</string>
-    <string name="password_hint" translatable="false">12345678</string>
-    <string name="password_key">password</string>
+    <string name="password_hint" translatable="false">*****</string>
+    <string name="password_key">Password</string>
     <string name="forgot_password_string">Forgot Password?</string>
     <string name="register_button">Seal the Pact</string>
     <string name="login_button">Enter the void</string>

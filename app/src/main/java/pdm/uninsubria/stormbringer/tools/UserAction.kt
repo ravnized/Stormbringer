@@ -1,46 +1,48 @@
 package pdm.uninsubria.stormbringer.tools
 
+import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import kotlinx.coroutines.tasks.await
+import java.lang.Exception
+import android.content.Context
 
-
-class UserAction {
+class UserAction(private val context: Context) {
     private val auth = Firebase.auth
-    companion object {
-        private var instance: UserAction? = null
-    }
-    val user = auth.currentUser
-    val email = user?.email
-    val uid = user?.uid
+
+    val user get() = auth.currentUser
+    val email get()= user?.email
+    val uid get()= user?.uid
 
 
-    fun registerUser(email: String, pass: String) {
-        auth.createUserWithEmailAndPassword(email, pass)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    // Utente registrato correttamente
-                    val user = auth.currentUser
-                    println("Successo: ${user?.email}")
-                } else {
-                    // Gestione errore (es. email già esistente)
-                    println("Errore: ${task.exception?.message}")
-                }
-            }
+    suspend fun registerUser(email: String, pass: String): Boolean {
+
+        return try{
+            val result = auth.createUserWithEmailAndPassword(email, pass).await()
+            UserPreferences(context).savePreferencesBoolean(true, "logged")
+            Log.i("registerUser", "User registered successfully")
+            true
+        }catch (e: Exception) {
+            Log.e("registerUser", e.message.toString())
+            false
+        }
+
     }
 
-    fun loginUser(email: String, pass: String) {
-        auth.signInWithEmailAndPassword(email, pass)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    // Login effettuato correttamente
-                    val user = auth.currentUser
-                    println("Successo: ${user?.email}")
-                } else {
-                    // Gestione errore (es. email non registrata)
-                    println("Errore: ${task.exception?.message}")
-                }
-            }
+    suspend fun loginUser(email: String, pass: String): Boolean {
+        return try {
+            auth.signInWithEmailAndPassword(email, pass).await()
+            UserPreferences(context).savePreferencesBoolean(true, "logged")
+            Log.i("loginUser", "Login successful")
+            true
+        } catch (e: Exception) {
+            Log.e("loginUser", e.message.toString())
+            false
+        }
     }
 
 }
+
+

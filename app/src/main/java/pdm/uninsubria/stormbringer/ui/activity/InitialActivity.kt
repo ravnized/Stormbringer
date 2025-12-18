@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -35,9 +36,12 @@ import pdm.uninsubria.stormbringer.ui.theme.white_100
 import pdm.uninsubria.stormbringer.ui.theme.white_20
 
 @Composable
-fun StormbringerIntial(){
+fun StormbringerIntial(
+    onLoginClick: () -> Unit,    // Callback per il login
+    onRegisterClick: () -> Unit  // Callback per la registrazione
+){
     Surface(
-        modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
+        modifier = Modifier.fillMaxSize(), color = stormbringer_background_dark
     ){
         Column(
             modifier = Modifier.padding(16.dp),
@@ -121,10 +125,12 @@ fun StormbringerIntial(){
 
                         onClick = {
 
+                            Log.i("UI", "Click Login")
+                            onLoginClick()
 
 
 
-                        }, modifier = Modifier.padding(), content = {
+                        }, modifier = Modifier.padding().fillMaxWidth(), content = {
                             Text(
                                 text = stringResource(R.string.login_title),
                                 style = MaterialTheme.typography.headlineSmall,
@@ -169,10 +175,11 @@ fun StormbringerIntial(){
 
                         onClick = {
 
+                            Log.i("UI", "Click Register")
+                            onRegisterClick()
 
 
-
-                        }, modifier = Modifier.padding(), content = {
+                        }, modifier = Modifier.padding().fillMaxWidth(), content = {
                             Text(
                                 text = stringResource(R.string.register_title),
                                 style = MaterialTheme.typography.headlineSmall,

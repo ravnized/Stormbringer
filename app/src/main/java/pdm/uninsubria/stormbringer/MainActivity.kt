@@ -2,45 +2,32 @@ package pdm.uninsubria.stormbringer
 
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-import pdm.uninsubria.stormbringer.tools.UserAction
-import pdm.uninsubria.stormbringer.tools.UserPreferences
 import pdm.uninsubria.stormbringer.ui.fragments.InitialFragment
-import pdm.uninsubria.stormbringer.ui.theme.StormbringerTheme
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            StormbringerTheme {
-                val context = LocalContext.current
-                val scope = rememberCoroutineScope()
+        setContentView(R.layout.activity_main)
+        Log.i("MainActivity", "Provo a caricare il Fragment")
 
-                var userLogged = remember { false }
+        lifecycleScope.launch {
 
-                scope.launch {
-                    //userLogged = UserPreferences(context).getPreferencesBoolean("logged")
-                }
+            val userLogged = false
 
-                if (userLogged){
-                    //vai alla home
-                }else{
-                    Log.i("MainActivity", "InitialFragment")
-                    InitialFragment()
+            if (userLogged) {
+                // Logica per andare alla Home
+            } else {
+                Log.i("MainActivity", "Carico InitialFragment")
+
+                // 3. Eseguiamo la transazione SOLO se è il primo avvio
+                if (savedInstanceState == null) {
+                    supportFragmentManager.beginTransaction().setReorderingAllowed(true)
+                        .add(R.id.fragment_container, InitialFragment()).commit()
                 }
             }
-
-
-
-
-
         }
     }
 }

@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.UserAction
+import pdm.uninsubria.stormbringer.ui.fragments.CharacterManageFragment
 import pdm.uninsubria.stormbringer.ui.theme.AlertDialogRegister
 import pdm.uninsubria.stormbringer.ui.theme.InputEmail
 import pdm.uninsubria.stormbringer.ui.theme.InputPassword
@@ -61,6 +62,7 @@ fun StormbringerLogin() {
         var showDialog by remember { mutableStateOf(false) }
         var titleAlert by remember { mutableStateOf("") }
         var messageAlert by remember { mutableStateOf("") }
+        val activity = context as? androidx.fragment.app.FragmentActivity
         Column(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -190,7 +192,17 @@ fun StormbringerLogin() {
                                 }
                                 titleAlert = if (success) "Patto Sigillato" else "Rituale Fallito"
                                 messageAlert = if (success) "Benvenuto nel Vuoto." else "Riprova."
-                                showDialog = true
+
+                                if(success){
+                                    activity?.supportFragmentManager?.beginTransaction()
+                                        ?.setReorderingAllowed(true)
+                                        ?.replace(R.id.fragment_container, CharacterManageFragment())
+                                        ?.commit()
+                                }
+
+
+                                showDialog = !success
+
                             }
 
 

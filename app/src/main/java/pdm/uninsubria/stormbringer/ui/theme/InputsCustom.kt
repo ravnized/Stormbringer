@@ -187,3 +187,38 @@ fun InputPassword(state: TextFieldState = rememberTextFieldState(initialText = "
 
 }
 
+@Composable
+fun InputGeneral(state: TextFieldState = rememberTextFieldState(initialText = ""), label: Int, hint: Int){
+    Column(
+        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center,
+
+        ){
+        Text(
+            stringResource(label),
+            modifier = Modifier.padding(horizontal = 5.dp, vertical = 0.dp),
+        )
+
+
+
+        TextField (
+
+            placeholder = {
+                Text(
+                    stringResource(hint),
+                    color = white_20
+                )
+            },
+            lineLimits = TextFieldLineLimits.SingleLine,
+            state = state,
+            shape = RoundedCornerShape(16.dp),
+            colors = inputStyling,
+            modifier = Modifier.padding().fillMaxWidth()
+        )
+
+
+
+    }
+}
+

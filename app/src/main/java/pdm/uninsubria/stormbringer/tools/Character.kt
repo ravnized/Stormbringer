@@ -10,8 +10,21 @@ data class Character(
     var characterClass: String = "",
     var level: Int = 1,
     var isAlive: Boolean = true,
-    var xp: Int = 0
+    var xp: Int = 0,
+    var image: String = "",
+    var hp: Int = 0,
+    var mp: Int = 0,
+    var strength: Int = 0,
+    var dexterity: Int = 0,
+    var intelligence: Int = 0,
+    var wisdom: Int = 0,
+    var charisma: Int = 0,
+    var inventory: List<String> = emptyList(),
+    var spells: List<String> = emptyList(),
+    var background: String = "",
 ) {
+
+
 
     fun isDead() = !isAlive
 
@@ -47,6 +60,10 @@ suspend fun createCharacter(db: FirebaseFirestore, userUid: String, character: C
 
 
         newCharRef.set(characterWithId).await()
+
+
+
+
 
         Log.d("DB", "ID: ${newCharRef.id}")
         true
@@ -85,4 +102,20 @@ suspend fun deleteCharacter(db: FirebaseFirestore, userUid: String, characterId:
         false
     }
 }
+
+suspend fun getAllCharacters(db: FirebaseFirestore, userUid: String): List<Character> {
+    return try {
+        val charCollection =
+            db.collection("users").document(userUid).collection("characters").get().await()
+
+        val characters = charCollection.documents.mapNotNull { it.toObject(Character::class.java) }
+
+        Log.d("DB", "Fetched ${characters.size} characters")
+        characters
+    } catch (e: Exception) {
+        Log.e("DB", "Errore: ${e.message}")
+        emptyList()
+    }
+}
+
 

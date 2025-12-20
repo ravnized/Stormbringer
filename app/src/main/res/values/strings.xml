@@ -15,4 +15,12 @@
     <string name="player_mode_desc">Manage hero, stats and inventory</string>
     <string name="master_mode_title">Game Master Mode</string>
     <string name="master_mode_desc">Orchestrate the chaos and manage the adventure</string>
+    <string name="chracter_name_key">Name Character</string>
+    <string name="chracter_name_hint">Thornam</string>
+    <string name="chracter_class_key">Class</string>
+    <string name="chracter_class_hint">Warrior</string>
+    <string name="character_manage_title">Manage Characters</string>
+    <string name="character_manage_create_button">Create character</string>
+    <string name="hp_label">HP</string>
+    <string name="mp_label">MP</string>
 </resources>

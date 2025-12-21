@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -32,7 +33,8 @@ import pdm.uninsubria.stormbringer.R
 fun ControlButton(
     currentValue: Int = 10,
     maxValue: Int = 10,
-    onChange: (Int) -> Unit = {}
+    onChange: (Int) -> Unit = {},
+    visibility: Boolean = true
 ) {
 
     val valueColor = when {
@@ -57,7 +59,8 @@ fun ControlButton(
             color = glow_active,
             onClick = {
                 if (currentValue > 0) onChange(currentValue - 1)
-            }
+            },
+            visibility = visibility
         )
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -78,7 +81,8 @@ fun ControlButton(
             color = stormbringer_primary,
             onClick = {
                 onChange(currentValue + 1)
-            }
+            },
+            visibility = visibility
         )
     }
 }
@@ -87,13 +91,14 @@ fun ControlButton(
 fun SquareActionButton(
     icon: Int,
     color: Color,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    visibility: Boolean = true
 ) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .size(30.dp)
-
+            .alpha(if(visibility) 1f else 0f)
             .background(stormbringer_surface_dark)
             .clickable { onClick() }
     ) {

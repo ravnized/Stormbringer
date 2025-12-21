@@ -24,6 +24,8 @@ class UserPreferences(private val context: Context) {
 
         val ALERT_KEY = booleanPreferencesKey("alert")
 
+        val CHARACTER_ID_KEY = stringPreferencesKey("character_id")
+
     }
 
 
@@ -44,6 +46,9 @@ class UserPreferences(private val context: Context) {
 
     val alert: Flow<Boolean> = context.dataStore.data
         .map {  preferences -> preferences[ALERT_KEY] ?: false }
+
+    val character_id: Flow<String> = context.dataStore.data
+        .map {  preferences -> preferences[CHARACTER_ID_KEY] ?: "" }
 
 
 
@@ -69,11 +74,11 @@ class UserPreferences(private val context: Context) {
         }
     }
 
-    suspend fun getPreferencesString(key: String){
+    suspend fun getPreferencesString(key: String): String {
         val dataStoreKey = stringPreferencesKey(key)
-        context.dataStore.edit {
-            preferences -> preferences[dataStoreKey]
-        }
+        return context.dataStore.data.map { preferences ->
+            preferences[dataStoreKey] ?: ""
+        }.first()
     }
 
     suspend fun getPreferencesBoolean(key: String): Boolean{
@@ -83,6 +88,26 @@ class UserPreferences(private val context: Context) {
             preferences -> preferences[dataStoreKey] ?: false
         }.first()
 
+    }
+
+    suspend fun getPreferencesInt(key: String): Int {
+        val dataStoreKey = intPreferencesKey(key)
+        return context.dataStore.data.map { preferences ->
+            preferences[dataStoreKey] ?: 0
+        }.first()
+    }
+
+    suspend fun getPreferencesCharacterId(): String {
+        return context.dataStore.data.map { preferences ->
+            preferences[CHARACTER_ID_KEY] ?: ""
+        }.first()
+    }
+
+
+    suspend fun clearPreferences() {
+        context.dataStore.edit { preferences ->
+            preferences.clear()
+        }
     }
 
 

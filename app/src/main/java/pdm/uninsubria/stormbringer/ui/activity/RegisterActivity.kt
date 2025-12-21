@@ -2,6 +2,7 @@ package pdm.uninsubria.stormbringer.ui.activity
 
 
 import android.util.Log
+import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -37,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentManager
 import kotlinx.coroutines.launch
 import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.UserAction
@@ -51,12 +53,11 @@ import pdm.uninsubria.stormbringer.ui.theme.stormbringer_surface_dark
 import pdm.uninsubria.stormbringer.ui.theme.white_100
 import pdm.uninsubria.stormbringer.ui.theme.white_20
 
-private const val EMAIL_VALIDATION_REGEX = "/^(?!\\.)(?!.*\\.\\.)([a-z0-9_'+\\-\\.]*)[a-z0-9_'+\\-]@([a-z0-9][a-z0-9\\-]*\\.)+[a-z]{2,}\$/i"
 private const val PASSWORD_VALIDATION_REGEX =
     "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$"
 
 fun isEmailValid(email: String): Boolean {
-    return EMAIL_VALIDATION_REGEX.toRegex(RegexOption.IGNORE_CASE).matches(email)
+    return email.isNotEmpty() && Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
 
 fun isPasswordValid(password: String): Boolean {
@@ -159,7 +160,7 @@ fun StormbringerRegister() {
             InputEmail(
                 valueEmail,
                 onFocusChanged = { isFocused -> if (!isFocused) isEmailTouched = true })
-            if (isEmailTouched && !isEmailValid) {
+            if (isEmailTouched && !isEmailValid && valueEmail.text.isNotEmpty()) {
                 Text(
                     text = stringResource(R.string.invalid_email_format), // Crea questa stringa in strings.xml
                     color = Color.Red,
@@ -171,7 +172,7 @@ fun StormbringerRegister() {
                 state = valuePassword,
                 onFocusChanged = { isFocused -> if (!isFocused) isPasswordTouched = true }
             )
-            if (isPasswordTouched && !isPasswordValid) {
+            if (isPasswordTouched && !isPasswordValid && valuePassword.text.isNotEmpty()) {
                 Text(
                     text = stringResource(R.string.invalid_password_format), // Crea questa stringa in strings.xml
                     color = Color.Red,
@@ -231,6 +232,8 @@ fun StormbringerRegister() {
                                 messageAlert = if (success) "Benvenuto nel Vuoto." else "Riprova."
                                 showDialog = true
                                 if (success) {
+                                    activity?.supportFragmentManager?.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+
                                     activity?.supportFragmentManager?.beginTransaction()
                                         ?.setReorderingAllowed(true)
                                         ?.replace(

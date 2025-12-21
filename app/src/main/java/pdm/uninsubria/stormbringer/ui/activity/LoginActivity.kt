@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentManager
 import kotlinx.coroutines.launch
 import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.UserAction
@@ -153,7 +154,7 @@ fun StormbringerLogin() {
                 onFocusChanged = { isFocused -> if (!isFocused) isEmailTouched = true }
             )
             // Mostra l'errore solo se il campo è stato toccato e non è valido
-            if (isEmailTouched && !isEmailValid) {
+            if (isEmailTouched && !isEmailValid && valueEmail.text.isNotEmpty()) {
                 Text(
                     text = stringResource(R.string.invalid_email_format), // Crea questa stringa in strings.xml
                     color = Color.Red,
@@ -167,7 +168,7 @@ fun StormbringerLogin() {
                 state = valuePassword,
                 onFocusChanged = { isFocused -> if (!isFocused) isPasswordTouched = true }
             )
-            if (isPasswordTouched && !isPasswordValid) {
+            if (isPasswordTouched && !isPasswordValid && valuePassword.text.isNotEmpty()) {
                 Text(
                     text = stringResource(R.string.invalid_password_format), // Crea questa stringa in strings.xml
                     color = Color.Red,
@@ -224,6 +225,9 @@ fun StormbringerLogin() {
                                 messageAlert = if (success) "Benvenuto nel Vuoto." else "Riprova."
 
                                 if(success){
+
+                                    activity?.supportFragmentManager?.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+
                                     activity?.supportFragmentManager?.beginTransaction()
                                         ?.setReorderingAllowed(true)
                                         ?.replace(R.id.fragment_container, CharacterManageFragment())

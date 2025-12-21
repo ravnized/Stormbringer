@@ -23,6 +23,7 @@ class MainActivity : FragmentActivity() {
                 //get userLogged from
                 val user = UserPreferences(this@MainActivity)
                 val userLogged = user.getPreferencesBoolean("logged")
+                Log.i("MainActivity", "Valore di userLogged: $userLogged")
                 val transaction =
                     supportFragmentManager.beginTransaction().setReorderingAllowed(true)
                 if (userLogged) {

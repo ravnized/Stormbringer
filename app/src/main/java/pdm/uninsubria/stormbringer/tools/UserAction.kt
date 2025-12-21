@@ -43,7 +43,7 @@ class UserAction(private val context: Context) {
     suspend fun logoutUser(): Boolean {
         return try {
             auth.signOut()
-            UserPreferences(context).savePreferencesBoolean(false, "logged")
+            UserPreferences(context).clearPreferences()
             Log.i("logoutUser", "Logout successful")
             true
         } catch (e: Exception) {
@@ -63,6 +63,10 @@ class UserAction(private val context: Context) {
             false
         }
     }
+
+
+
+
 
 }
 

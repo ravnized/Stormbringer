@@ -47,6 +47,7 @@ data class Character(
     fun resetXp() {
         xp = 0
     }
+
 }
 
 suspend fun createCharacter(db: FirebaseFirestore, userUid: String, character: Character): Boolean {
@@ -115,6 +116,24 @@ suspend fun getAllCharacters(db: FirebaseFirestore, userUid: String): List<Chara
     } catch (e: Exception) {
         Log.e("DB", "Errore: ${e.message}")
         emptyList()
+    }
+}
+
+suspend fun getCharacterById(
+    db: FirebaseFirestore, userUid: String, characterId: String
+): Character? {
+    return try {
+        val charDoc =
+            db.collection("users").document(userUid).collection("characters")
+                .document(characterId).get().await()
+
+        val character = charDoc.toObject(Character::class.java)
+
+        Log.d("DB", "Fetched character: ${character?.name}")
+        character
+    } catch (e: Exception) {
+        Log.e("DB", "Errore: ${e.message}")
+        null
     }
 }
 

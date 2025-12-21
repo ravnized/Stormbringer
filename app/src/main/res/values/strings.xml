@@ -25,4 +25,6 @@
     <string name="mp_label">MP</string>
     <string name="invalid_password_format">The password needs to be min 8 character</string>
     <string name="invalid_email_format">Email address invalid</string>
+    <string name="no_characters_message">No character found</string>
+    <string name="charcater_edit_title">Character</string>
 </resources>

@@ -23,6 +23,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -49,7 +50,7 @@ val inputStyling = TextFieldColors(
     disabledLeadingIconColor = white_20,
     errorLeadingIconColor = Pink40,
     focusedTrailingIconColor = white_60,
-    unfocusedTrailingIconColor =white_40,
+    unfocusedTrailingIconColor = white_40,
     disabledTrailingIconColor = white_20,
     errorTrailingIconColor = Pink40,
     focusedLabelColor = stormbringer_primary,
@@ -76,15 +77,20 @@ val inputStyling = TextFieldColors(
 
 
 @Composable
-fun InputEmail(state: TextFieldState = rememberTextFieldState(initialText = "")){
+fun InputEmail(
+    state: TextFieldState = rememberTextFieldState(initialText = ""),
+    onFocusChanged: (isFocused: Boolean) -> Unit
+) {
 
 
     Column(
-        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Center,
 
-    ){
+        ) {
         Text(
             stringResource(R.string.email_key),
             modifier = Modifier.padding(horizontal = 5.dp, vertical = 0.dp),
@@ -92,27 +98,29 @@ fun InputEmail(state: TextFieldState = rememberTextFieldState(initialText = ""))
 
 
 
-            TextField (
+        TextField(
 
-                placeholder = {
-                    Text(
-                        stringResource(R.string.email_hint),
-                        color = white_20
-                    )
-                },
-                lineLimits = TextFieldLineLimits.SingleLine,
-                state = state,
-                leadingIcon = @Composable {
-                        Icon(
-                            painter = painterResource(id = R.drawable.mail_24px),
-                            contentDescription = "leadingIcon",
-                        )
-                },
-                shape = RoundedCornerShape(16.dp),
-                colors = inputStyling,
-                modifier = Modifier.padding().fillMaxWidth()
-            )
-
+            placeholder = {
+                Text(
+                    stringResource(R.string.email_hint), color = white_20
+                )
+            },
+            lineLimits = TextFieldLineLimits.SingleLine,
+            state = state,
+            leadingIcon = @Composable {
+                Icon(
+                    painter = painterResource(id = R.drawable.mail_24px),
+                    contentDescription = "leadingIcon",
+                )
+            },
+            shape = RoundedCornerShape(16.dp),
+            colors = inputStyling,
+            modifier = Modifier
+                .padding()
+                .fillMaxWidth()
+                .onFocusChanged { focusState ->
+                    onFocusChanged(focusState.isFocused)
+                })
 
 
     }
@@ -120,67 +128,71 @@ fun InputEmail(state: TextFieldState = rememberTextFieldState(initialText = ""))
 }
 
 
-
-
-
 @Composable
-fun InputPassword(state: TextFieldState = rememberTextFieldState(initialText = "")){
+fun InputPassword(
+    state: TextFieldState = rememberTextFieldState(initialText = ""),
+    onFocusChanged: (isFocused: Boolean) -> Unit
+) {
 
 
     Column(
-        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Center
-    ){
+    ) {
         Text(
             stringResource(R.string.password_key),
             modifier = Modifier.padding(horizontal = 5.dp, vertical = 0.dp),
         )
 
 
-            var passwordHidden by rememberSaveable { mutableStateOf(true) }
-            SecureTextField(
-                state = state,
-                placeholder = { Text(stringResource(R.string.password_hint), color = white_20) },
-                textObfuscationMode =
-                    if (passwordHidden) TextObfuscationMode.RevealLastTyped
-                    else TextObfuscationMode.Visible,
+        var passwordHidden by rememberSaveable { mutableStateOf(true) }
+        SecureTextField(
+            state = state,
+            placeholder = { Text(stringResource(R.string.password_hint), color = white_20) },
+            textObfuscationMode = if (passwordHidden) TextObfuscationMode.RevealLastTyped
+            else TextObfuscationMode.Visible,
 
 
+            leadingIcon = @Composable {
 
-                leadingIcon = @Composable {
+                Icon(
+                    painter = painterResource(id = R.drawable.lock_24px),
+                    contentDescription = "leadingIcon",
+                )
 
+            },
+            trailingIcon = @Composable {
+
+
+                IconButton(onClick = { passwordHidden = !passwordHidden }) {
+                    val visibilityIcon = if (passwordHidden) {
                         Icon(
-                            painter = painterResource(id = R.drawable.lock_24px),
+                            painter = painterResource(id = R.drawable.visibility_24px),
                             contentDescription = "leadingIcon",
                         )
+                    } else {
+                        Icon(
+                            painter = painterResource(id = R.drawable.visibility_off_24px),
+                            contentDescription = "leadingIcon",
+                        )
+                    }
+                    visibilityIcon
+                }
 
-                },
-                trailingIcon = @Composable {
+            },
+            shape = RoundedCornerShape(16.dp),
+            colors = inputStyling,
+            modifier = Modifier
+                .padding()
+                .fillMaxWidth()
+                .onFocusChanged { focusState ->
+                    onFocusChanged(focusState.isFocused)
+                }
 
-
-                        IconButton(onClick = { passwordHidden = !passwordHidden }) {
-                            val visibilityIcon =
-                                if (passwordHidden) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.visibility_24px),
-                                        contentDescription = "leadingIcon",
-                                    )
-                                }else{
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.visibility_off_24px),
-                                        contentDescription = "leadingIcon",
-                                    )
-                                }
-                            visibilityIcon
-                        }
-
-                },
-                shape = RoundedCornerShape(16.dp),
-                colors = inputStyling,
-                modifier = Modifier.padding().fillMaxWidth()
-
-            )
+        )
 
 
     }
@@ -188,13 +200,19 @@ fun InputPassword(state: TextFieldState = rememberTextFieldState(initialText = "
 }
 
 @Composable
-fun InputGeneral(state: TextFieldState = rememberTextFieldState(initialText = ""), label: Int, hint: Int){
+fun InputGeneral(
+    state: TextFieldState = rememberTextFieldState(initialText = ""),
+    label: Int,
+    hint: Int
+) {
     Column(
-        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Center,
 
-        ){
+        ) {
         Text(
             stringResource(label),
             modifier = Modifier.padding(horizontal = 5.dp, vertical = 0.dp),
@@ -202,21 +220,21 @@ fun InputGeneral(state: TextFieldState = rememberTextFieldState(initialText = ""
 
 
 
-        TextField (
+        TextField(
 
             placeholder = {
                 Text(
-                    stringResource(hint),
-                    color = white_20
+                    stringResource(hint), color = white_20
                 )
             },
             lineLimits = TextFieldLineLimits.SingleLine,
             state = state,
             shape = RoundedCornerShape(16.dp),
             colors = inputStyling,
-            modifier = Modifier.padding().fillMaxWidth()
+            modifier = Modifier
+                .padding()
+                .fillMaxWidth()
         )
-
 
 
     }

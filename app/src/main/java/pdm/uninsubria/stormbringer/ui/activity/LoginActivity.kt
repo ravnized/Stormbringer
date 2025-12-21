@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.draw.innerShadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -62,6 +63,10 @@ fun StormbringerLogin() {
         var showDialog by remember { mutableStateOf(false) }
         var titleAlert by remember { mutableStateOf("") }
         var messageAlert by remember { mutableStateOf("") }
+        var isEmailTouched by remember { mutableStateOf(false) }
+        var isPasswordTouched by remember { mutableStateOf(false) }
+        val isEmailValid = remember(valueEmail.text) { isEmailValid(valueEmail.text.toString()) }
+        val isPasswordValid = remember(valuePassword.text) { isPasswordValid(valuePassword.text.toString()) }
         val activity = context as? androidx.fragment.app.FragmentActivity
         Column(
             modifier = Modifier.padding(16.dp),
@@ -143,8 +148,33 @@ fun StormbringerLogin() {
 
 
 
-            InputEmail(valueEmail)
-            InputPassword(valuePassword)
+            InputEmail(
+                state = valueEmail,
+                onFocusChanged = { isFocused -> if (!isFocused) isEmailTouched = true }
+            )
+            // Mostra l'errore solo se il campo è stato toccato e non è valido
+            if (isEmailTouched && !isEmailValid) {
+                Text(
+                    text = stringResource(R.string.invalid_email_format), // Crea questa stringa in strings.xml
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                )
+            }
+
+
+            InputPassword(
+                state = valuePassword,
+                onFocusChanged = { isFocused -> if (!isFocused) isPasswordTouched = true }
+            )
+            if (isPasswordTouched && !isPasswordValid) {
+                Text(
+                    text = stringResource(R.string.invalid_password_format), // Crea questa stringa in strings.xml
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                )
+            }
 
 
             Spacer(modifier = Modifier.padding(16.dp))
@@ -171,7 +201,7 @@ fun StormbringerLogin() {
                 propagateMinConstraints = true,
                 content = {
                     Button(
-                        enabled = true, shape = RoundedCornerShape(16.dp), colors = ButtonColors(
+                        enabled = isEmailValid && isPasswordValid, shape = RoundedCornerShape(16.dp), colors = ButtonColors(
                         containerColor = stormbringer_primary,
                         contentColor = stormbringer_background_dark,
                         disabledContainerColor = white_20,

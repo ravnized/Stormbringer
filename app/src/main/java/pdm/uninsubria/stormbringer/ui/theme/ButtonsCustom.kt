@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.Character
 
-@Preview
+
 @Composable
 fun ButtonInfoCharacter(onClick: () -> Unit = {}, character: Character = Character(name = "Gandalf")){
     Box(
@@ -62,7 +62,7 @@ fun ButtonInfoCharacter(onClick: () -> Unit = {}, character: Character = Charact
         })
 }
 
-@Preview
+
 @Composable
 fun ButtonActionPrimary(onClick: () -> Unit = {}, id: Int = R.string.login_button){
     Box(

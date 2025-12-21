@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.draw.innerShadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -39,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.UserAction
+import pdm.uninsubria.stormbringer.ui.fragments.CharacterManageFragment
 import pdm.uninsubria.stormbringer.ui.theme.AlertDialogRegister
 import pdm.uninsubria.stormbringer.ui.theme.InputEmail
 import pdm.uninsubria.stormbringer.ui.theme.InputPassword
@@ -49,6 +51,17 @@ import pdm.uninsubria.stormbringer.ui.theme.stormbringer_surface_dark
 import pdm.uninsubria.stormbringer.ui.theme.white_100
 import pdm.uninsubria.stormbringer.ui.theme.white_20
 
+private const val EMAIL_VALIDATION_REGEX = "/^(?!\\.)(?!.*\\.\\.)([a-z0-9_'+\\-\\.]*)[a-z0-9_'+\\-]@([a-z0-9][a-z0-9\\-]*\\.)+[a-z]{2,}\$/i"
+private const val PASSWORD_VALIDATION_REGEX =
+    "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$"
+
+fun isEmailValid(email: String): Boolean {
+    return EMAIL_VALIDATION_REGEX.toRegex(RegexOption.IGNORE_CASE).matches(email)
+}
+
+fun isPasswordValid(password: String): Boolean {
+    return PASSWORD_VALIDATION_REGEX.toRegex().matches(password)
+}
 
 @Composable
 fun StormbringerRegister() {
@@ -63,6 +76,12 @@ fun StormbringerRegister() {
         var showDialog by remember { mutableStateOf(false) }
         var titleAlert by remember { mutableStateOf("") }
         var messageAlert by remember { mutableStateOf("") }
+        var isEmailTouched by remember { mutableStateOf(false) }
+        var isPasswordTouched by remember { mutableStateOf(false) }
+        val isEmailValid = remember(valueEmail.text) { isEmailValid(valueEmail.text.toString()) }
+        val isPasswordValid =
+            remember(valuePassword.text) { isPasswordValid(valuePassword.text.toString()) }
+        val activity = context as? androidx.fragment.app.FragmentActivity
         Column(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -137,14 +156,30 @@ fun StormbringerRegister() {
                 )
             }
 
+            InputEmail(
+                valueEmail,
+                onFocusChanged = { isFocused -> if (!isFocused) isEmailTouched = true })
+            if (isEmailTouched && !isEmailValid) {
+                Text(
+                    text = stringResource(R.string.invalid_email_format), // Crea questa stringa in strings.xml
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                )
+            }
+            InputPassword(
+                state = valuePassword,
+                onFocusChanged = { isFocused -> if (!isFocused) isPasswordTouched = true }
+            )
+            if (isPasswordTouched && !isPasswordValid) {
+                Text(
+                    text = stringResource(R.string.invalid_password_format), // Crea questa stringa in strings.xml
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                )
+            }
 
-
-
-
-
-
-            InputEmail(valueEmail)
-            InputPassword(valuePassword)
 
 
             Spacer(modifier = Modifier.padding(16.dp))
@@ -171,12 +206,14 @@ fun StormbringerRegister() {
                 propagateMinConstraints = true,
                 content = {
                     Button(
-                        enabled = true, shape = RoundedCornerShape(16.dp), colors = ButtonColors(
-                        containerColor = stormbringer_primary,
-                        contentColor = stormbringer_background_dark,
-                        disabledContainerColor = white_20,
-                        disabledContentColor = white_20
-                    ),
+                        enabled = isEmailValid && isPasswordValid,
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonColors(
+                            containerColor = stormbringer_primary,
+                            contentColor = stormbringer_background_dark,
+                            disabledContainerColor = white_20,
+                            disabledContentColor = white_20
+                        ),
 
                         onClick = {
                             scope.launch {
@@ -193,10 +230,21 @@ fun StormbringerRegister() {
                                 titleAlert = if (success) "Patto Sigillato" else "Rituale Fallito"
                                 messageAlert = if (success) "Benvenuto nel Vuoto." else "Riprova."
                                 showDialog = true
+                                if (success) {
+                                    activity?.supportFragmentManager?.beginTransaction()
+                                        ?.setReorderingAllowed(true)
+                                        ?.replace(
+                                            R.id.fragment_container,
+                                            CharacterManageFragment()
+                                        )
+                                        ?.commit()
+                                }
                             }
 
 
-                        }, modifier = Modifier.padding(), content = {
+                        },
+                        modifier = Modifier.padding(),
+                        content = {
                             Text(
                                 text = stringResource(R.string.register_button),
                                 style = MaterialTheme.typography.headlineSmall,

@@ -55,7 +55,7 @@ fun StormbringerCharacterManage() {
                 color = stormbringer_primary,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
-            // Use state for characters and load them inside LaunchedEffect
+
             var characters by remember { mutableStateOf<List<Character>>(emptyList()) }
 
             LaunchedEffect(key1 = auth.uid) {
@@ -67,18 +67,18 @@ fun StormbringerCharacterManage() {
                 }
             }
             LazyColumn(
-                modifier = Modifier// Occupa tutto lo spazio disponibile tranne quello del bottone in fondo
+                modifier = Modifier
                     .fillMaxWidth(),
-                // QUESTO RISOLVE IL TUO PROBLEMA: Mette 16dp tra ogni elemento
+
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                contentPadding = PaddingValues(bottom = 16.dp, top = 16.dp) // Un po' di aria in fondo alla lista
+                contentPadding = PaddingValues(bottom = 16.dp, top = 16.dp)
             ) {
                 items(characters) { character ->
                     ButtonInfoCharacter(
                         character = character,
                         onClick = {
-                            // Qui gestirai il click sul dettaglio
+
                         }
                     )
                 }

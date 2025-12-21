@@ -23,4 +23,6 @@
     <string name="character_manage_create_button">Create character</string>
     <string name="hp_label">HP</string>
     <string name="mp_label">MP</string>
+    <string name="invalid_password_format">The password needs to be min 8 character</string>
+    <string name="invalid_email_format">Email address invalid</string>
 </resources>

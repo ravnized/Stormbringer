@@ -26,6 +26,8 @@ class UserPreferences(private val context: Context) {
 
         val CHARACTER_ID_KEY = stringPreferencesKey("character_id")
 
+        val PLAYER_MODE_KEY = stringPreferencesKey("player_mode")
+
     }
 
 
@@ -49,6 +51,11 @@ class UserPreferences(private val context: Context) {
 
     val character_id: Flow<String> = context.dataStore.data
         .map {  preferences -> preferences[CHARACTER_ID_KEY] ?: "" }
+
+    val player_mode: Flow<String> = context.dataStore.data
+        .map {  preferences -> preferences[PLAYER_MODE_KEY] ?: "" }
+
+
 
 
 

@@ -1,7 +1,10 @@
 package pdm.uninsubria.stormbringer.tools
 
+import android.content.Context
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.tasks.await
 
 data class Character(
@@ -137,4 +140,47 @@ suspend fun getCharacterById(
     }
 }
 
+suspend fun getCharacterById(
+    db: FirebaseFirestore, characterId: String
+): Character? {
+    return try {
+        val usersSnapshot = db.collection("users").get().await()
 
+        for (userDoc in usersSnapshot.documents) {
+            val charDoc = userDoc.reference.collection("characters")
+                .document(characterId).get().await()
+
+            if (charDoc.exists()) {
+                val character = charDoc.toObject(Character::class.java)
+                Log.d("DB", "Fetched character: ${character?.name}")
+                return character
+            }
+        }
+
+        Log.d("DB", "Character with ID $characterId not found")
+        null
+    } catch (e: Exception) {
+        Log.e("DB", "Errore: ${e.message}")
+        null
+    }
+}
+
+suspend fun saveGuestCharacterToPrefs(context: Context, newCharacter: Character) {
+    val userPrefs = UserPreferences(context)
+    val gson = Gson()
+
+    val existingJson = userPrefs.getPreferencesString("guest_characters_list") ?: "[]"
+
+    val type = object : TypeToken<MutableList<Character>>() {}.type
+    val characterList: MutableList<Character> = try {
+        gson.fromJson(existingJson, type) ?: mutableListOf()
+    } catch (e: Exception) {
+        mutableListOf()
+    }
+
+    characterList.add(newCharacter)
+
+    val newJson = gson.toJson(characterList)
+    Log.i("CharacterCreation", "Saving guest characters list: $newJson")
+    userPrefs.savePreferencesString(key = "guest_characters_list", value = newJson)
+}

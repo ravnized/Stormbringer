@@ -130,3 +130,31 @@ suspend fun loadPartyInfoByUser(db: FirebaseFirestore, userUid: String): Party? 
         null
     }
 }
+
+suspend fun loadPartyInfoByCharacter(db: FirebaseFirestore, characterId: String): Party? {
+    return try {
+        val usersSnapshot = db.collection("users").get().await()
+
+        for (userDoc in usersSnapshot.documents) {
+            val charDoc = userDoc.reference.collection("characters")
+                .document(characterId).get().await()
+
+            if (charDoc.exists()) {
+                val partyId = userDoc.getString("partyId")
+                if (!partyId.isNullOrEmpty()) {
+                    return loadPartyInfo(db, partyId)
+                } else {
+                    Log.e("PartyManager", "Il personaggio non è in nessun party")
+                    return null
+                }
+            }
+        }
+
+        Log.e("PartyManager", "Personaggio con ID $characterId non trovato")
+        null
+
+    } catch (e: Exception) {
+        Log.e("PartyManager", "Errore caricamento info party per personaggio: ${e.message}")
+        null
+    }
+}

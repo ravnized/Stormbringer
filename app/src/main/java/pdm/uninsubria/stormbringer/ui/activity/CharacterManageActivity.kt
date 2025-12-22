@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.launch
 import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.Character
@@ -49,6 +51,7 @@ import pdm.uninsubria.stormbringer.ui.fragments.CharacterEditFragment
 import pdm.uninsubria.stormbringer.ui.fragments.CharacterManageFragment
 import pdm.uninsubria.stormbringer.ui.fragments.InitialFragment
 import pdm.uninsubria.stormbringer.ui.theme.ButtonInfoCharacter
+import pdm.uninsubria.stormbringer.ui.theme.NavigationBarSection
 import pdm.uninsubria.stormbringer.ui.theme.stormbringer_background_dark
 import pdm.uninsubria.stormbringer.ui.theme.stormbringer_primary
 import pdm.uninsubria.stormbringer.ui.theme.stormbringer_surface_dark
@@ -67,7 +70,7 @@ fun StormbringerCharacterManage() {
     var characters by remember { mutableStateOf<List<Character>>(emptyList()) }
     var selectedCharacterId by remember { mutableStateOf("") }
     val userPrefs = UserPreferences(context)
-    LaunchedEffect(Unit) {
+    LaunchedEffect(key1 = auth.uid) {
         val uid = auth.uid
         if (uid != null) {
             val retrieved = getAllCharacters(db, uid)
@@ -76,100 +79,35 @@ fun StormbringerCharacterManage() {
             selectedCharacterId = savedId
             Log.i("CharacterManageActivity", "Characters retrieved: $characters")
             Log.i("CharacterManageActivity", "Selected Character ID: $selectedCharacterId")
+        }else{
+            val json = userPrefs.getPreferencesString("guest_characters_list") ?: "[]"
+            Log.i("CharacterManageActivity", "Guest Characters JSON: $json")
+            val type = object : TypeToken<List<Character>>() {}.type
+            characters = Gson().fromJson(json, type) ?: emptyList()
+            Log.i("CharacterManageActivity", "Guest Characters retrieved: $characters")
+            val savedId = userPrefs.getPreferencesString("character_id") ?: ""
+            selectedCharacterId = savedId
         }
     }
-    Scaffold(
-        containerColor = stormbringer_background_dark,
 
-        topBar = {
-            Surface(
-                color = stormbringer_background_dark,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = stringResource(R.string.character_manage_title),
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = stormbringer_primary,
-                    )
-
-                    IconButton(onClick = {}) {
-                        Icon(
-                            painter = painterResource(R.drawable.person_24px),
-                            contentDescription = "Profile",
-                            tint = stormbringer_primary,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-                }
-            }
-        }, bottomBar = {
-            NavigationBar(
-                containerColor = stormbringer_surface_dark // Colore sfondo barra
-            ) {
-                NavigationBarItem(
-                    selected = selectedItem == 0, onClick = {
-                    selectedItem = 0
-                    activity?.supportFragmentManager?.beginTransaction()?.setReorderingAllowed(true)
-                        ?.replace(R.id.fragment_container, CharacterManageFragment())
-                        ?.addToBackStack(null)?.commit()
-                }, icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.domino_mask_24px),
-                        contentDescription = "Heroes"
-                    )
-                }, label = { Text("Heroes") }, colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = stormbringer_primary,
-                    indicatorColor = stormbringer_primary.copy(alpha = 0.2f)
-                )
-                )
-
-
-                NavigationBarItem(
-                    selected = selectedItem == 1, onClick = {
-                    selectedItem = 1
-                    activity?.supportFragmentManager?.beginTransaction()?.setReorderingAllowed(true)
-                        ?.replace(R.id.fragment_container, CharacterEditFragment())
-                        ?.addToBackStack(null)?.commit()
-                }, icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.brush_24px),
-                        contentDescription = "Manage Heroes"
-                    )
-                }, label = { Text("Manage Heroes") }, colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = stormbringer_primary,
-                    indicatorColor = stormbringer_primary.copy(alpha = 0.2f)
-                )
-                )
-            }
-        }, floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    activity?.supportFragmentManager?.beginTransaction()?.setReorderingAllowed(true)
-                        ?.replace(R.id.fragment_container, CharacterCreationFragment())
-                        ?.addToBackStack(null)?.commit()
-                },
-                containerColor = stormbringer_primary,
-                contentColor = stormbringer_background_dark,
-                shape = CircleShape
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.edit_24px), contentDescription = "Edit"
-                )
-            }
+    NavigationBarSection(headLine = stringResource(R.string.character_manage_title), currentTab = 0 ,floatingActionButton = {
+        FloatingActionButton(
+            onClick = {
+                activity?.supportFragmentManager?.beginTransaction()?.setReorderingAllowed(true)
+                    ?.replace(R.id.fragment_container, CharacterCreationFragment())
+                    ?.addToBackStack(null)?.commit()
+            },
+            containerColor = stormbringer_primary,
+            contentColor = stormbringer_background_dark,
+            shape = CircleShape
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.add_24px), contentDescription = "Add"
+            )
         }
-
-    ) { innerPadding ->
+    },content =  { paddingValues ->
         Column(
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier.padding(paddingValues),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -206,33 +144,5 @@ fun StormbringerCharacterManage() {
             }
 
         }
-
-
-        if (showProfileDialog) {
-            ProfileDialog(
-                email = auth.currentUser?.email ?: "Ospite",
-                onDismiss = { showProfileDialog = false },
-                onLogout = {
-                    showProfileDialog = false
-
-                    val userAction = UserAction(context)
-
-
-                    scope.launch {
-                        val result = userAction.logoutUser()
-                        if (result) {
-                            Log.i("ProfileDialog", "Logout successful")
-
-                            activity?.supportFragmentManager?.popBackStack(
-                                null, FragmentManager.POP_BACK_STACK_INCLUSIVE
-                            )
-                            activity?.supportFragmentManager?.beginTransaction()
-                                ?.replace(R.id.fragment_container, InitialFragment())?.commit()
-                        } else {
-                            Log.e("ProfileDialog", "Logout failed")
-                        }
-                    }
-                })
-        }
-    }
+    })
 }

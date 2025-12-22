@@ -25,6 +25,9 @@ class InitialFragment : Fragment() {
                             navigateToLogin()
                         }, onRegisterClick = {
                             navigateToRegister()
+                        },
+                        onGuestClick = {
+                            navigateToGuest()
                         }
 
 
@@ -45,5 +48,10 @@ class InitialFragment : Fragment() {
 
         parentFragmentManager.beginTransaction().setReorderingAllowed(true)
             .replace(R.id.fragment_container, RegisterFragment()).addToBackStack(null).commit()
+    }
+
+    private fun navigateToGuest() {
+        parentFragmentManager.beginTransaction().setReorderingAllowed(true)
+            .replace(R.id.fragment_container, GuestFragment()).addToBackStack(null).commit()
     }
 }

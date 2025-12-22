@@ -6,13 +6,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -107,6 +110,47 @@ fun SquareActionButton(
             contentDescription = null,
             tint = color,
             modifier = Modifier.size(24.dp)
+        )
+    }
+}
+
+@Composable
+fun ExperienceBar(currentXp: Int = 100, level: Int = 0) {
+    val maxXp = level * 1000f
+
+    val progress = (currentXp / maxXp).coerceIn(0f, 1f)
+
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(0.8F),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Bottom
+        ) {
+            Text(
+                text = "LVL $level",
+                color = stormbringer_primary,
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = "$currentXp / ${maxXp.toInt()} XP",
+                color = white_70,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        LinearProgressIndicator(
+            progress = { progress },
+            modifier = Modifier
+                .fillMaxWidth(0.8F)
+                .height(12.dp)
+                .width(1.dp)
+                .clip(RoundedCornerShape(6.dp)),
+            color = stormbringer_primary,
+            trackColor = white_30
         )
     }
 }

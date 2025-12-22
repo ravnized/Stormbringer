@@ -27,4 +27,17 @@
     <string name="invalid_email_format">Email address invalid</string>
     <string name="no_characters_message">No character found</string>
     <string name="charcater_edit_title">Character</string>
+    <string name="party_title">Party</string>
+    <string name="party_code_label">Party Code\n</string>
+    <string name="party_code_hint">aajhdwlawjdladj</string>
+    <string name="join_party_title">You\'re not part of any party</string>
+    <string name="join_party_button">Join the party\n</string>
+    <string name="join_party_failed_title">Error</string>
+    <string name="join_party_failed_message">Maybe the code is wrong?</string>
+    <string name="accept">Accept</string>
+    <string name="party_info_title">party code</string>
+    <string name="guest_continue_button">Continue as Ghost</string>
+    <string name="guest_access_title">Guest</string>
+    <string name="character_creation_success">Character Created\n</string>
+    <string name="no_heroes_selected">No heroes selected</string>
 </resources>

@@ -38,7 +38,8 @@ import pdm.uninsubria.stormbringer.ui.theme.white_20
 @Composable
 fun StormbringerIntial(
     onLoginClick: () -> Unit,    // Callback per il login
-    onRegisterClick: () -> Unit  // Callback per la registrazione
+    onRegisterClick: () -> Unit,  // Callback per la registrazione
+    onGuestClick: () -> Unit  // Callback per accesso come ospite
 ){
     Surface(
         modifier = Modifier.fillMaxSize(), color = stormbringer_background_dark
@@ -182,6 +183,55 @@ fun StormbringerIntial(
                         }, modifier = Modifier.padding().fillMaxWidth(), content = {
                             Text(
                                 text = stringResource(R.string.register_title),
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = stormbringer_surface_dark,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        })
+                })
+
+            Spacer(modifier = Modifier.padding(8.dp))
+
+
+            Box(
+
+                modifier = Modifier
+                    .innerShadow(
+                        shape = RoundedCornerShape(16.dp), shadow = Shadow(
+                            color = glow_subtle,
+                            spread = 1.dp,
+                            radius = 16.dp,
+                            //offset = DpOffset(x=0.dp,y=1.5.dp)
+                        )
+                    )
+                    .dropShadow(
+                        shape = RoundedCornerShape(16.dp), shadow = Shadow(
+                            color = glow_subtle,
+                            spread = 1.dp,
+                            radius = 16.dp,
+                            //offset = DpOffset(x=0.dp,1.5.dp)
+                        )
+                    ),
+                contentAlignment = Alignment.Center,
+                propagateMinConstraints = true,
+                content = {
+                    Button(
+                        enabled = true, shape = RoundedCornerShape(16.dp), colors = ButtonColors(
+                            containerColor = stormbringer_primary,
+                            contentColor = stormbringer_background_dark,
+                            disabledContainerColor = white_20,
+                            disabledContentColor = white_20
+                        ),
+
+                        onClick = {
+
+                            Log.i("UI", "Click Guest")
+                            onGuestClick()
+
+
+                        }, modifier = Modifier.padding().fillMaxWidth(), content = {
+                            Text(
+                                text = stringResource(R.string.guest_access_title),
                                 style = MaterialTheme.typography.headlineSmall,
                                 color = stormbringer_surface_dark,
                                 modifier = Modifier.padding(16.dp)

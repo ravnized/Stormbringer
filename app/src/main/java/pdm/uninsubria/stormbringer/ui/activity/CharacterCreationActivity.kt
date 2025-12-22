@@ -1,6 +1,7 @@
 package pdm.uninsubria.stormbringer.ui.activity
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,12 +32,14 @@ import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.Character
 import pdm.uninsubria.stormbringer.tools.UserAction
 import pdm.uninsubria.stormbringer.tools.createCharacter
+import pdm.uninsubria.stormbringer.tools.saveGuestCharacterToPrefs
 import pdm.uninsubria.stormbringer.ui.fragments.CharacterManageFragment
 import pdm.uninsubria.stormbringer.ui.theme.ButtonActionPrimary
 import pdm.uninsubria.stormbringer.ui.theme.ControlButton
 import pdm.uninsubria.stormbringer.ui.theme.InputGeneral
 import pdm.uninsubria.stormbringer.ui.theme.glow_active
 import pdm.uninsubria.stormbringer.ui.theme.stormbringer_background_dark
+import java.util.UUID
 
 @Composable
 fun StormbringerCharacterCreation() {
@@ -112,12 +115,12 @@ fun StormbringerCharacterCreation() {
 
             }
 
-
+            val textToast = stringResource(R.string.character_creation_success)
             val scope = rememberCoroutineScope()
             ButtonActionPrimary(
                 onClick = {
                     //create character object
-                    val character = Character(
+                    var character = Character(
                         name = nameState.text as String,
                         characterClass = classState.text as String,
                         hp = hp,
@@ -143,6 +146,24 @@ fun StormbringerCharacterCreation() {
                                 ?.commit()
 
                         }
+                    }else{
+                        Log.i("CharacterCreation", "Guest Mode: Saving locally")
+
+                        val guestId = UUID.randomUUID().toString()
+                        character = character.copy(id = guestId)
+
+                        scope.launch {
+                            saveGuestCharacterToPrefs(context, character)
+
+                            Toast.makeText(context, textToast, Toast.LENGTH_SHORT).show()
+
+
+                            activity?.supportFragmentManager?.beginTransaction()
+                                ?.setReorderingAllowed(true)
+                                ?.replace(R.id.fragment_container, CharacterManageFragment())
+                                ?.commit()
+                        }
+
                     }
 
 

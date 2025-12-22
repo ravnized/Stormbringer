@@ -64,6 +64,18 @@ class UserAction(private val context: Context) {
         }
     }
 
+    suspend fun loginAsGuest(): Boolean {
+        return try {
+            auth.signInAnonymously().await()
+            UserPreferences(context).savePreferencesBoolean(true, "logged")
+            Log.i("loginAsGuest", "Guest login successful")
+            true
+        } catch (e: Exception) {
+            Log.e("loginAsGuest", e.message.toString())
+            false
+        }
+    }
+
 
 
 

@@ -18,15 +18,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import pdm.uninsubria.stormbringer.R
+import pdm.uninsubria.stormbringer.tools.UserPreferences
 import pdm.uninsubria.stormbringer.ui.theme.stormbringer_primary
 import pdm.uninsubria.stormbringer.ui.theme.stormbringer_surface_dark
 import pdm.uninsubria.stormbringer.ui.theme.white_40
@@ -37,14 +40,18 @@ fun ProfileDialog(
     onDismiss: () -> Unit,
     onLogout: () -> Unit
 ) {
-
+    var savedMode = ""
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        savedMode = UserPreferences(context).getPreferencesString("player_mode")
+    }
     Dialog(onDismissRequest = { onDismiss() }) {
 
         Card(
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = stormbringer_surface_dark),
             modifier = Modifier
-                .fillMaxWidth(0.75f)
+                .fillMaxWidth()
                 .wrapContentHeight()
                 .padding(16.dp)
         ) {
@@ -52,7 +59,8 @@ fun ProfileDialog(
                 modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                TextButton(onClick = onDismiss) {
+                TextButton(onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.End)){
                     Icon(
                         painter = painterResource(id = R.drawable.close_24px),
                         contentDescription = "Close Icon",
@@ -74,13 +82,25 @@ fun ProfileDialog(
 
                 // Email Utente
                 Text(
-                    text = "Loggato come:",
+                    text = "${stringResource(R.string.email_key)} :",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
                 Text(
                     text = email,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                //Ruolo
+                Text(
+                    text = stringResource(R.string.role_player),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
+                Text(
+                    text = savedMode,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )

@@ -91,7 +91,8 @@ fun StormbringerPartyActivity() {
     NavigationBarSection(
         headLine = stringResource(R.string.party_title),
         floatingActionButton = {},
-        currentTab = 2,
+        currentTab = if(mode=="GM") 0 else 2,
+        gameMode = mode,
         content = { innerPadding ->
             Column(
                 modifier = Modifier
@@ -211,7 +212,7 @@ fun playerScreen(partyId: String = "") {
                 character
             }
 
-            selectedCharacterId = UserPreferences(context).getPreferencesString("character_id") ?: ""
+            selectedCharacterId = UserPreferences(context).getPreferencesString("character_id")
         }
         //party info screen and list of members
         Column(

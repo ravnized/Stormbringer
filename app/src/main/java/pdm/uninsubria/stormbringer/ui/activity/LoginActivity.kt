@@ -26,7 +26,9 @@ import androidx.fragment.app.FragmentManager
 import kotlinx.coroutines.launch
 import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.UserAction
+import pdm.uninsubria.stormbringer.tools.UserPreferences
 import pdm.uninsubria.stormbringer.ui.fragments.CharacterManageFragment
+import pdm.uninsubria.stormbringer.ui.fragments.PartyManagerFragment
 import pdm.uninsubria.stormbringer.ui.theme.AlertDialogRegister
 import pdm.uninsubria.stormbringer.ui.theme.ButtonActionPrimary
 import pdm.uninsubria.stormbringer.ui.theme.HeaderLogo
@@ -101,6 +103,7 @@ fun StormbringerLogin() {
 
             ButtonActionPrimary(conditionEnable = isEmailValid && isPasswordValid, onClick = {
                 scope.launch {
+                    val savedMode = UserPreferences(context).getPreferencesString("player_mode")
                     val success = userAction.loginUser(
                         email = valueEmail.text.toString(), pass = valuePassword.text.toString()
                     )
@@ -119,10 +122,20 @@ fun StormbringerLogin() {
                             null, FragmentManager.POP_BACK_STACK_INCLUSIVE
                         )
 
-                        activity?.supportFragmentManager?.beginTransaction()
-                            ?.setReorderingAllowed(true)?.replace(
-                                R.id.fragment_container, CharacterManageFragment()
-                            )?.commit()
+
+                        if(savedMode == "GM") {
+                            activity?.supportFragmentManager?.beginTransaction()
+                                ?.setReorderingAllowed(true)?.replace(
+                                    R.id.fragment_container, PartyManagerFragment()
+                                )?.commit()
+
+                        }else{
+                            activity?.supportFragmentManager?.beginTransaction()
+                                ?.setReorderingAllowed(true)?.replace(
+                                    R.id.fragment_container, CharacterManageFragment()
+                                )?.commit()
+                        }
+
                     }
 
 

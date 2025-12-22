@@ -60,7 +60,9 @@ fun SelectorMode() {
     val scope = rememberCoroutineScope()
 
     Column(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -70,8 +72,7 @@ fun SelectorMode() {
                     modeSelected = "PLAYER"
                     Log.i("UI", "Modalità selezionata: $modeSelected")
                     UserPreferences(context).savePreferencesString(
-                        key = "player_mode",
-                        value = modeSelected
+                        key = "player_mode", value = modeSelected
                     )
                 }
             },
@@ -86,8 +87,7 @@ fun SelectorMode() {
                     modeSelected = "GM"
                     Log.i("UI", "Modalità selezionata: $modeSelected")
                     UserPreferences(context).savePreferencesString(
-                        key = "player_mode",
-                        value = modeSelected
+                        key = "player_mode", value = modeSelected
                     )
                 }
             },
@@ -105,7 +105,8 @@ fun NavigationBarSection(
     headLine: String,
     floatingActionButton: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
-    currentTab: Int
+    currentTab: Int,
+    gameMode: String = "PLAYER"
 ) {
     val context = LocalContext.current
     val activity = context as? androidx.fragment.app.FragmentActivity
@@ -151,63 +152,94 @@ fun NavigationBarSection(
             NavigationBar(
                 containerColor = stormbringer_surface_dark
             ) {
-                NavigationBarItem(
-                    selected = currentTab == 0, onClick = {
-                        if(currentTab != 0) {
+
+                if (gameMode == "PLAYER") {
+                    NavigationBarItem(
+                        selected = currentTab == 0, onClick = {
+                        if (currentTab != 0) {
                             activity?.supportFragmentManager?.beginTransaction()
                                 ?.setReorderingAllowed(true)
                                 ?.replace(R.id.fragment_container, CharacterManageFragment())
                                 ?.addToBackStack(null)?.commit()
                         }
-                }, icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.domino_mask_24px),
-                        contentDescription = "Heroes"
+                    }, icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.domino_mask_24px),
+                            contentDescription = "Heroes"
+                        )
+                    }, label = { Text("Heroes") }, colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = stormbringer_primary,
+                        indicatorColor = stormbringer_primary.copy(alpha = 0.2f)
                     )
-                }, label = { Text("Heroes") }, colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = stormbringer_primary,
-                    indicatorColor = stormbringer_primary.copy(alpha = 0.2f)
-                )
-                )
-
-
-                NavigationBarItem(
-                    selected = currentTab == 1, onClick = {
-                        if (currentTab != 1) {
-                            activity?.supportFragmentManager?.beginTransaction()
-                                ?.setReorderingAllowed(true)
-                                ?.replace(R.id.fragment_container, CharacterEditFragment())
-                                ?.addToBackStack(null)?.commit()
-                        }
-                }, icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.brush_24px),
-                        contentDescription = "Manage Heroes"
                     )
-                }, label = { Text("Manage Heroes") }, colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = stormbringer_primary,
-                    indicatorColor = stormbringer_primary.copy(alpha = 0.2f)
-                )
-                )
 
-                NavigationBarItem(
-                    selected = currentTab == 2, onClick = {
+                    NavigationBarItem(
+                        selected = currentTab == 1,
+                        onClick = {
+                            if (currentTab != 1) {
+                                activity?.supportFragmentManager?.beginTransaction()
+                                    ?.setReorderingAllowed(true)
+                                    ?.replace(R.id.fragment_container, CharacterEditFragment())
+                                    ?.addToBackStack(null)?.commit()
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.brush_24px),
+                                contentDescription = "Manage Heroes"
+                            )
+                        },
+                        label = { Text("Manage Heroes") },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = stormbringer_primary,
+                            indicatorColor = stormbringer_primary.copy(alpha = 0.2f)
+                        )
+                    )
+
+                    NavigationBarItem(
+                        selected = currentTab == 2, onClick = {
                         if (currentTab != 2) {
                             activity?.supportFragmentManager?.beginTransaction()
                                 ?.setReorderingAllowed(true)
                                 ?.replace(R.id.fragment_container, PartyManagerFragment())
                                 ?.addToBackStack(null)?.commit()
                         }
-                }, icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.sailing_24px),
-                        contentDescription = "Party"
+                    }, icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.sailing_24px),
+                            contentDescription = "Party"
+                        )
+                    }, label = { Text("Party") }, colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = stormbringer_primary,
+                        indicatorColor = stormbringer_primary.copy(alpha = 0.2f)
                     )
-                }, label = { Text("Party") }, colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = stormbringer_primary,
-                    indicatorColor = stormbringer_primary.copy(alpha = 0.2f)
-                )
-                )
+                    )
+                } else if (gameMode == "GM") {
+                    NavigationBarItem(
+                        selected = currentTab == 0,
+                        onClick = {
+                            if (currentTab != 0) {
+                                activity?.supportFragmentManager?.beginTransaction()
+                                    ?.setReorderingAllowed(true)
+                                    ?.replace(R.id.fragment_container, PartyManagerFragment())
+                                    ?.addToBackStack(null)?.commit()
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.sailing_24px),
+                                contentDescription = "Party Manager"
+                            )
+                        },
+                        label = { Text(stringResource(R.string.party_title)) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = stormbringer_primary,
+                            indicatorColor = stormbringer_primary.copy(alpha = 0.2f)
+                        )
+                    )
+                }
+
+
             }
         }, floatingActionButton = {
             floatingActionButton()
@@ -269,10 +301,7 @@ fun HeaderLogo(id: Int) {
                     radius = 16.dp,
                     //offset = DpOffset(x=0.dp,1.5.dp)
                 )
-            ),
-        contentAlignment = Alignment.Center,
-        propagateMinConstraints = true,
-        content = {
+            ), contentAlignment = Alignment.Center, propagateMinConstraints = true, content = {
             Image(
                 painter = painterResource(id = R.mipmap.stormbringer_logo_foreground),
                 contentDescription = "Stormbringer Logo",

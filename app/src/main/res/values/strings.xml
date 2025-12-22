@@ -40,4 +40,5 @@
     <string name="guest_access_title">Guest</string>
     <string name="character_creation_success">Character Created\n</string>
     <string name="no_heroes_selected">No heroes selected</string>
+    <string name="role_player">Role:</string>
 </resources>

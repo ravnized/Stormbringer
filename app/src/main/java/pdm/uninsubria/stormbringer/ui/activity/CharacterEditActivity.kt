@@ -40,10 +40,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.launch
 import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.Character
@@ -158,23 +156,44 @@ fun StormbringerCharacterEditActivity() {
                 )
             }
         }, floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    visibilityMod = true
-                },
-                containerColor = stormbringer_primary,
-                contentColor = stormbringer_background_dark,
-                shape = CircleShape
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.edit_24px), contentDescription = "Edit"
-                )
+
+            if (!visibilityMod) {
+
+                FloatingActionButton(
+                    onClick = {
+                        visibilityMod = true
+                    },
+                    containerColor = stormbringer_primary,
+                    contentColor = stormbringer_background_dark,
+                    shape = CircleShape
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.edit_24px), contentDescription = "Edit"
+                    )
+                }
+            } else {
+                FloatingActionButton(
+                    onClick = {
+                        visibilityMod = false
+                    },
+                    containerColor = stormbringer_primary,
+                    contentColor = stormbringer_background_dark,
+                    shape = CircleShape
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.check_24px),
+                        contentDescription = "Save"
+                    )
+                }
             }
         }
 
     ) { innerPadding ->
         Column(
-            modifier = Modifier.padding(innerPadding).padding(16.dp).fillMaxWidth(),
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(16.dp)
+                .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
@@ -198,47 +217,51 @@ fun StormbringerCharacterEditActivity() {
 
                 ExperienceBar(character!!.xp, character!!.level)
 
-                ControlButton(
-                    currentValue = character!!.hp,
-                    maxValue = 100,
-                    onChange = { value ->
-                        scope.launch {
-                            character = character!!.copy(hp = value)
-                            changeCharInfo(
-                                db = db,
-                                userUid = FirebaseAuth.getInstance().currentUser!!.uid,
-                                characterId = character!!.id,
-                                field = "hp",
-                                value = value
-                            )
+                Row(
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
 
-                        }
-                    }
-                , visibility = visibilityMod
-                )
-                ControlButton(
-                    currentValue = character!!.mp,
-                    maxValue = 100,
-                    onChange = { value ->
-                        scope.launch {
-                            character = character!!.copy(mp = value)
-                            changeCharInfo(
-                                db = db,
-                                userUid = FirebaseAuth.getInstance().currentUser!!.uid,
-                                characterId = character!!.id,
-                                field = "mp",
-                                value = value
-                            )
+                    ControlButton(
+                        currentValue = character!!.hp, maxValue = 100, onChange = { value ->
+                            scope.launch {
+                                character = character!!.copy(hp = value)
+                                changeCharInfo(
+                                    db = db,
+                                    userUid = FirebaseAuth.getInstance().currentUser!!.uid,
+                                    characterId = character!!.id,
+                                    field = "hp",
+                                    value = value
+                                )
 
-                        }
-                    }
-                    , visibility = visibilityMod
-                )
+                            }
+                        }, visibility = visibilityMod
+                    )
+                    ControlButton(
+                        currentValue = character!!.mp, maxValue = 100, onChange = { value ->
+                            scope.launch {
+                                character = character!!.copy(mp = value)
+                                changeCharInfo(
+                                    db = db,
+                                    userUid = FirebaseAuth.getInstance().currentUser!!.uid,
+                                    characterId = character!!.id,
+                                    field = "mp",
+                                    value = value
+                                )
+
+                            }
+                        }, visibility = visibilityMod
+                    )
+                }
             }
         }
     }
 
 }
+
 @Preview
 @Composable
 fun ExperienceBar(currentXp: Int = 100, level: Int = 0) {
@@ -247,8 +270,7 @@ fun ExperienceBar(currentXp: Int = 100, level: Int = 0) {
     val progress = (currentXp / maxXp).coerceIn(0f, 1f)
 
     Column(
-        modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(0.8F),

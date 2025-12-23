@@ -72,6 +72,7 @@ dependencies {
     implementation("androidx.navigation:navigation-ui:2.7.7")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.animation)
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter)
     androidTestImplementation(libs.androidx.junit)

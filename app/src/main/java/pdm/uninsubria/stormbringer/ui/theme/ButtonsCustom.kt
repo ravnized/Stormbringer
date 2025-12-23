@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.Character
+import pdm.uninsubria.stormbringer.tools.Party
 
 
 @Composable
@@ -68,11 +69,11 @@ fun ButtonInfoCharacter(
         content = {
             Button(
                 enabled = true, shape = RoundedCornerShape(16.dp), colors = ButtonColors(
-                containerColor = stormbringer_surface_dark,
-                contentColor = stormbringer_background_dark,
-                disabledContainerColor = white_20,
-                disabledContentColor = white_20
-            ),
+                    containerColor = stormbringer_surface_dark,
+                    contentColor = stormbringer_background_dark,
+                    disabledContainerColor = white_20,
+                    disabledContentColor = white_20
+                ),
 
                 onClick = {
                     onClick()
@@ -91,9 +92,66 @@ fun ButtonInfoCharacter(
         })
 }
 
+@Preview
+@Composable
+fun ButtonInfoParty(
+    onClick: () -> Unit = {},
+    party: Party = Party(name = "Fellowship"),
+) {
+
+    Box(
+        contentAlignment = Alignment.Center,
+        propagateMinConstraints = true,
+        modifier = Modifier
+            .background(
+                color = stormbringer_surface_dark, shape = RoundedCornerShape(16.dp)
+            )
+            .height(100.dp),
+        content = {
+            Button(
+                enabled = true, shape = RoundedCornerShape(16.dp), colors = ButtonColors(
+                    containerColor = stormbringer_surface_dark,
+                    contentColor = stormbringer_background_dark,
+                    disabledContainerColor = white_20,
+                    disabledContentColor = white_20
+                ),
+
+                onClick = {
+                    onClick()
+                }, modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(), content = {
+                    //row with a image of the character on the left and info on the right
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.Start,
+                    ) {
+                        Text(
+                            text = party.name,
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = white_70
+                        )
+                        Text(
+                            text = "${party.members.size} members",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = white_50,
+                            maxLines = 1,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+
+
+                })
+        })
+}
 
 @Composable
-fun ButtonActionPrimary(onClick: () -> Unit = {}, id: Int = R.string.login_button, conditionEnable: Boolean = true) {
+fun ButtonActionPrimary(
+    onClick: () -> Unit = {},
+    id: Int = R.string.login_button,
+    conditionEnable: Boolean = true
+) {
     Box(
         modifier = Modifier
             .innerShadow(
@@ -112,11 +170,11 @@ fun ButtonActionPrimary(onClick: () -> Unit = {}, id: Int = R.string.login_butto
             ), contentAlignment = Alignment.Center, propagateMinConstraints = true, content = {
             Button(
                 enabled = conditionEnable, shape = RoundedCornerShape(16.dp), colors = ButtonColors(
-                containerColor = stormbringer_primary,
-                contentColor = stormbringer_background_dark,
-                disabledContainerColor = white_20,
-                disabledContentColor = white_20
-            ),
+                    containerColor = stormbringer_primary,
+                    contentColor = stormbringer_background_dark,
+                    disabledContainerColor = white_20,
+                    disabledContentColor = white_20
+                ),
 
                 onClick = {
 
@@ -195,7 +253,9 @@ fun ButtonSelectorMode(
                     onClick()
                 }, modifier = Modifier.fillMaxWidth(), content = {
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Start,
                     ) {
@@ -206,7 +266,9 @@ fun ButtonSelectorMode(
                             modifier = Modifier.size(50.dp)
                         )
                         Column(
-                            modifier = Modifier.weight(1f).padding(start = 8.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 8.dp),
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.Start,
                         ) {

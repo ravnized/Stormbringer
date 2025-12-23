@@ -28,34 +28,8 @@ class UserPreferences(private val context: Context) {
 
         val PLAYER_MODE_KEY = stringPreferencesKey("player_mode")
 
+        val PARTY_ID_KEY = stringPreferencesKey("party_id")
     }
-
-
-    val userName: Flow<String> = context.dataStore.data
-        .map { preferences -> preferences[USER_NAME_KEY] ?: "" }
-
-    val password: Flow<String> = context.dataStore.data
-        .map {  preferences -> preferences[PASSWORD_KEY] ?: "" }
-
-    val user_level: Flow<Int> = context.dataStore.data
-        .map {  preferences -> preferences[USER_LEVEL_KEY] ?: 0 }
-
-    val unique_id: Flow<Int> = context.dataStore.data
-        .map {  preferences -> preferences[UNIQUE_ID_KEY] ?: 0 }
-
-    val logged: Flow<Boolean> = context.dataStore.data
-        .map {  preferences -> preferences[LOGGED_KEY] ?: false }
-
-    val alert: Flow<Boolean> = context.dataStore.data
-        .map {  preferences -> preferences[ALERT_KEY] ?: false }
-
-    val character_id: Flow<String> = context.dataStore.data
-        .map {  preferences -> preferences[CHARACTER_ID_KEY] ?: "" }
-
-    val player_mode: Flow<String> = context.dataStore.data
-        .map {  preferences -> preferences[PLAYER_MODE_KEY] ?: "" }
-
-
 
 
 
@@ -103,13 +77,6 @@ class UserPreferences(private val context: Context) {
             preferences[dataStoreKey] ?: 0
         }.first()
     }
-
-    suspend fun getPreferencesCharacterId(): String {
-        return context.dataStore.data.map { preferences ->
-            preferences[CHARACTER_ID_KEY] ?: ""
-        }.first()
-    }
-
 
     suspend fun clearPreferences() {
         context.dataStore.edit { preferences ->

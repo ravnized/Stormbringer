@@ -21,39 +21,23 @@ class Party(
 
 suspend fun createParty(db: FirebaseFirestore,userUid: String, partyName: String): String? {
     return try {
-        val userRef = db.collection("users").document(userUid)
-
-        val userSnapshot = userRef.get().await()
-        val currentPartyId = userSnapshot.getString("partyId")
-
-        if (!currentPartyId.isNullOrEmpty()) {
-            Log.e("PartyManager", "L'utente è già in un party ($currentPartyId)")
-            return null
-        }
-
         val newPartyRef = db.collection("parties").document()
-
         val newParty = Party(
             id = newPartyRef.id,
             name = partyName,
+            listOf(),
             gameMaster = userUid
         )
+        newPartyRef.set(newParty).await()
 
-        val batch = db.batch()
-
-        batch.set(newPartyRef, newParty)
-
-        batch.update(userRef, "partyId", newPartyRef.id)
-
-        batch.commit().await()
-
-        Log.i("PartyManager", "Party creato con ID: ${newPartyRef.id}")
+        Log.i("PartyManager", "Nuovo party creato con ID: ${newPartyRef.id}")
         newPartyRef.id
 
     } catch (e: Exception) {
         Log.e("PartyManager", "Errore creazione party: ${e.message}")
         null
     }
+
 }
 
 suspend fun addNewMemberToParty(db: FirebaseFirestore, partyId: String, newMemberId: String): Boolean {
@@ -91,20 +75,21 @@ suspend fun addNewMemberToParty(db: FirebaseFirestore, partyId: String, newMembe
     }
 }
 
-suspend fun loadPartyInfo(db: FirebaseFirestore, partyId: String): Party? {
+suspend fun loadPartyInfo(db: FirebaseFirestore, partyId: String, gameMaster: String): Party? {
     return try {
-        val partyRef = db.collection("parties").document(partyId)
-        val partySnapshot = partyRef.get().await()
+        val partySnapshot = db.collection("parties")
+            .whereEqualTo("id", partyId)
+            .whereEqualTo("gameMaster", gameMaster)
+            .get().await()
 
-        if (!partySnapshot.exists()) {
-            Log.e("PartyManager", "Party con ID $partyId non trovato")
-            return null
+        if (partySnapshot.documents.isNotEmpty()) {
+            val party = partySnapshot.documents[0].toObject(Party::class.java)
+            Log.i("PartyManager", "Info party caricate per ID: $partyId")
+            party
+        } else {
+            Log.e("PartyManager", "Party con ID $partyId non trovato per GM $gameMaster")
+            null
         }
-
-        val party = partySnapshot.toObject(Party::class.java)
-
-        Log.i("PartyManager", "Party info caricata per ID $partyId")
-        party
 
     } catch (e: Exception) {
         Log.e("PartyManager", "Errore caricamento info party: ${e.message}")
@@ -112,22 +97,20 @@ suspend fun loadPartyInfo(db: FirebaseFirestore, partyId: String): Party? {
     }
 }
 
-suspend fun loadPartyInfoByUser(db: FirebaseFirestore, userUid: String): Party? {
+suspend fun loadMultiplePartyInfoByGM(db: FirebaseFirestore, userUid: String): List<Party> {
     return try {
-        val userRef = db.collection("users").document(userUid)
-        val userSnapshot = userRef.get().await()
+        val partiesSnapshot = db.collection("parties")
+            .whereEqualTo("gameMaster", userUid)
+            .get().await()
 
-        val partyId = userSnapshot.getString("partyId")
-        if (partyId.isNullOrEmpty()) {
-            Log.e("PartyManager", "L'utente non è in nessun party")
-            return null
-        }
+        val parties = partiesSnapshot.documents.mapNotNull { it.toObject(Party::class.java) }
 
-        loadPartyInfo(db, partyId)
+        Log.i("PartyManager", "Caricate ${parties.size} party per GM $userUid")
+        parties
 
     } catch (e: Exception) {
-        Log.e("PartyManager", "Errore caricamento info party per utente: ${e.message}")
-        null
+        Log.e("PartyManager", "Errore caricamento party per GM: ${e.message}")
+        emptyList()
     }
 }
 

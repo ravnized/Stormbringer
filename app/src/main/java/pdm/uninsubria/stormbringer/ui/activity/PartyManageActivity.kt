@@ -17,13 +17,13 @@ import pdm.uninsubria.stormbringer.tools.loadPartyInfo
 fun PartyManageActivity() {
     val context = LocalContext.current
     val db = remember { FirebaseFirestore.getInstance() }
-    var party_id by remember { mutableStateOf("") }
+    var partyId by remember { mutableStateOf("") }
     var contentLoaded by remember { mutableStateOf(false) }
-    var partyInfo by remember { mutableStateOf<Party>(Party()) }
+    var partyInfo by remember { mutableStateOf(Party()) }
     LaunchedEffect(Unit) {
-        party_id = UserPreferences(context).getPreferencesString("party_id")
+        partyId = UserPreferences(context).getPreferencesString("party_id")
         val gameMaster = UserPreferences(context).getPreferencesString("unique_id")
-        partyInfo = loadPartyInfo(db = db, partyId = party_id, gameMaster = gameMaster ) ?: Party()
+        partyInfo = loadPartyInfo(db = db, partyId = partyId, gameMaster = gameMaster ) ?: Party()
 
         contentLoaded = true
     }

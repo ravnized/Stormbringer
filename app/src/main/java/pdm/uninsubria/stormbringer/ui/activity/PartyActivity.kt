@@ -1,18 +1,7 @@
 package pdm.uninsubria.stormbringer.ui.activity
 
 import android.util.Log
-import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -23,11 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -37,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -55,7 +41,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.fragment.app.FragmentActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -74,11 +59,11 @@ import pdm.uninsubria.stormbringer.ui.fragments.PartyManageFragment
 import pdm.uninsubria.stormbringer.ui.theme.AlertDialogRegister
 import pdm.uninsubria.stormbringer.ui.theme.ButtonInfoCharacter
 import pdm.uninsubria.stormbringer.ui.theme.ButtonInfoParty
+import pdm.uninsubria.stormbringer.ui.theme.CustomBottomSheet
 import pdm.uninsubria.stormbringer.ui.theme.InputGeneral
 import pdm.uninsubria.stormbringer.ui.theme.NavigationBarSection
 import pdm.uninsubria.stormbringer.ui.theme.stormbringer_background_dark
 import pdm.uninsubria.stormbringer.ui.theme.stormbringer_primary
-import pdm.uninsubria.stormbringer.ui.theme.stormbringer_surface_dark
 
 @Composable
 fun StormbringerPartyActivity() {
@@ -126,20 +111,22 @@ fun StormbringerPartyActivity() {
 
 
     NavigationBarSection(headLine = stringResource(R.string.party_title), floatingActionButton = {
-        FloatingActionButton(
-            onClick = {
-                //add new party
-                showSheet = true
-            },
-            containerColor = stormbringer_primary,
-            contentColor = stormbringer_background_dark,
-            shape = CircleShape
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.add_24px), contentDescription = "add"
-            )
+        if(mode=="GM") {
+            FloatingActionButton(
+                onClick = {
+                    //add new party
+                    showSheet = true
+                },
+                containerColor = stormbringer_primary,
+                contentColor = stormbringer_background_dark,
+                shape = CircleShape
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.add_24px), contentDescription = "add"
+                )
+            }
         }
-    }, currentTab = if (mode == "GM") 0 else 2, gameMode = mode, content = { innerPadding ->
+    }, currentTab = if (mode == "GM") 0 else 2, content = { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -175,7 +162,7 @@ fun StormbringerPartyActivity() {
     CustomBottomSheet(
         isVisible = showSheet, onDismiss = { showSheet = false }) {
         // Contenuto del form
-        CreatePartyForm(onCancel = { showSheet = false }, onCreate = { name ->
+        CreatePartyForm(onCancel = { showSheet = false }, onClick = { name ->
             showSheet = false
             //create new party
 
@@ -222,12 +209,15 @@ fun GameMasterScreen(parties: List<Party>) {
                             key = "current_party_id",
                             value = party.id
                         )
-
+                        //support going back to previous fragment
 
                         activity?.supportFragmentManager?.beginTransaction()
-                            ?.setReorderingAllowed(true)?.replace(
-                                R.id.fragment_container, PartyManageFragment()
-                            )?.commit()
+                            ?.replace(
+                                R.id.fragment_container,
+                                PartyManageFragment()
+                            )
+                            ?.addToBackStack(null)
+                            ?.commit()
                     }
 
                 })
@@ -237,71 +227,9 @@ fun GameMasterScreen(parties: List<Party>) {
 
 }
 
-@Composable
-fun CustomBottomSheet(
-    isVisible: Boolean, onDismiss: () -> Unit, content: @Composable () -> Unit
-) {
-    if (isVisible) {
-        BackHandler(onBack = onDismiss)
-    }
-    AnimatedVisibility(
-        visible = isVisible,
-        enter = fadeIn(animationSpec = tween(300)),
-        exit = fadeOut(animationSpec = tween(300)),
-        modifier = Modifier.zIndex(1f)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f))
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = onDismiss
-                ), contentAlignment = Alignment.BottomCenter
-        ) {
-
-        }
-    }
-
-
-    AnimatedVisibility(
-        visible = isVisible,
-        enter = slideInVertically(
-            initialOffsetY = { it }, animationSpec = tween(300)
-        ),
-        exit = slideOutVertically(
-            targetOffsetY = { it }, animationSpec = tween(300)
-        ),
-        modifier = Modifier
-            .zIndex(2f)
-            .fillMaxSize(),
-
-        ) {
-        Box(
-            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter
-        ) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = {}),
-                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                color = stormbringer_surface_dark,
-                shadowElevation = 8.dp
-            ) {
-                content()
-            }
-        }
-    }
-}
-
 
 @Composable
-fun CreatePartyForm(onCancel: () -> Unit, onCreate: (String) -> Unit) {
+fun CreatePartyForm(onCancel: () -> Unit, onClick: (String) -> Unit) {
     var partyName by remember { mutableStateOf("") }
 
     Column(
@@ -343,7 +271,7 @@ fun CreatePartyForm(onCancel: () -> Unit, onCreate: (String) -> Unit) {
             }
             Spacer(modifier = Modifier.width(16.dp))
             Button(
-                onClick = { if (partyName.isNotBlank()) onCreate(partyName) },
+                onClick = { if (partyName.isNotBlank()) onClick(partyName) },
                 colors = ButtonDefaults.buttonColors(containerColor = stormbringer_primary),
                 enabled = partyName.isNotBlank()
             ) {
@@ -357,7 +285,7 @@ fun CreatePartyForm(onCancel: () -> Unit, onCreate: (String) -> Unit) {
 @Composable
 fun playerScreen(partyId: String = "") {
     val scope = rememberCoroutineScope()
-    var partycode = rememberTextFieldState(initialText = "")
+    val partycode = rememberTextFieldState(initialText = "")
     val context = LocalContext.current
     var showDialog by remember { mutableStateOf(false) }
     //implement the player screen
@@ -391,7 +319,7 @@ fun playerScreen(partyId: String = "") {
                 onClick = {
                     //join party action
                     scope.launch {
-                        var result = addNewMemberToParty(
+                        val result = addNewMemberToParty(
                             db = FirebaseFirestore.getInstance(),
                             partyId = partycode.text.trim() as String,
                             newMemberId = UserPreferences(context).getPreferencesString("character_id")
@@ -430,7 +358,7 @@ fun playerScreen(partyId: String = "") {
         }
     } else {
         var characters: List<Character> = remember { mutableListOf<Character>() }
-        var scope = rememberCoroutineScope()
+        val scope = rememberCoroutineScope()
         var party: Party = remember { Party() }
         var selectedCharacterId by remember { mutableStateOf("") }
         scope.launch {

@@ -41,4 +41,9 @@
     <string name="character_creation_success">Character Created\n</string>
     <string name="no_heroes_selected">No heroes selected</string>
     <string name="role_player">Role:</string>
+    <string name="send_code_to_whatsapp">Send Code to Whatsapp</string>
+    <string name="whatsapp_text">Join my party with this code!</string>
+    <string name="whatsapp_not_installed">Sorry Whatsapp is not Installed</string>
+    <string name="party_members_list">Members:</string>
+    <string name="no_party_members">No Members in this party</string>
 </resources>

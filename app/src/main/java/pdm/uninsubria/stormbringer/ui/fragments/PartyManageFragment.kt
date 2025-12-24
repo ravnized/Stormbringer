@@ -25,7 +25,7 @@ class PartyManageFragment() : Fragment() {
 
         return ComposeView(requireContext()).apply {
             setContent {
-                Log.i("Inside Character Creation Fragment", "setContent")
+                Log.i("Inside Party Manage Fragment", "setContent")
                 StormbringerTheme {
                     PartyManageActivity()
                 }

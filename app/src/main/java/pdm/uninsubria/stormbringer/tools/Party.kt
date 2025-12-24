@@ -75,19 +75,16 @@ suspend fun addNewMemberToParty(db: FirebaseFirestore, partyId: String, newMembe
     }
 }
 
-suspend fun loadPartyInfo(db: FirebaseFirestore, partyId: String, gameMaster: String): Party? {
+suspend fun loadPartyInfo(db: FirebaseFirestore, partyId: String): Party? {
     return try {
-        val partySnapshot = db.collection("parties")
-            .whereEqualTo("id", partyId)
-            .whereEqualTo("gameMaster", gameMaster)
-            .get().await()
+        val partySnapshot = db.collection("parties").document(partyId).get().await()
 
-        if (partySnapshot.documents.isNotEmpty()) {
-            val party = partySnapshot.documents[0].toObject(Party::class.java)
-            Log.i("PartyManager", "Info party caricate per ID: $partyId")
+        if (partySnapshot.exists()) {
+            val party = partySnapshot.toObject(Party::class.java)
+            Log.i("PartyManager", "Info party caricate per ID $partyId")
             party
         } else {
-            Log.e("PartyManager", "Party con ID $partyId non trovato per GM $gameMaster")
+            Log.e("PartyManager", "Party con ID $partyId non trovato")
             null
         }
 

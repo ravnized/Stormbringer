@@ -52,10 +52,11 @@ fun StormbringerCharacterManage() {
     var characters by remember { mutableStateOf<List<Character>>(emptyList()) }
     var selectedCharacterId by remember { mutableStateOf("") }
     val userPrefs = UserPreferences(context)
-    var mode = remember { mutableStateOf("") }
+    var mode by remember { mutableStateOf("") }
     LaunchedEffect(key1 = auth.uid) {
         val uid = auth.uid
-        mode.value = userPrefs.getPreferencesString("character_id")
+        mode = userPrefs.getPreferencesString("player_mode")
+        Log.i("CharacterManageActivity", "Player mode: $mode")
         if (uid != null) {
             val retrieved = getAllCharacters(db, uid)
             characters = retrieved
@@ -77,12 +78,9 @@ fun StormbringerCharacterManage() {
     NavigationBarSection(
         headLine = stringResource(R.string.character_manage_title),
         currentTab = 0,
-        gameMode = mode.value,
         floatingActionButton = {
 
-            if(mode.value!="GM") {
-
-
+            if (mode != "GM") {
                 FloatingActionButton(
                     onClick = {
                         activity?.supportFragmentManager?.beginTransaction()
@@ -106,39 +104,44 @@ fun StormbringerCharacterManage() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                if (characters.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier,
 
-                LazyColumn(
-                    modifier = Modifier,
-
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    contentPadding = PaddingValues(16.dp)
-                ) {
-                    items(characters) { character ->
-                        val isSelected = (character.id == selectedCharacterId)
-                        ButtonInfoCharacter(
-                            character = character,
-                            isSelected = isSelected,
-                            onClick = {
-                                val newId = if (isSelected) "" else character.id
-                                selectedCharacterId = newId
-                                scope.launch {
-                                    val userPrefs = UserPreferences(context)
-                                    userPrefs.savePreferencesString(
-                                        key = "character_id",
-                                        value = newId
-                                    )
-                                    Log.i("Selection", "Salvato ID: $newId")
-                                }
-                            })
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        contentPadding = PaddingValues(16.dp)
+                    ) {
+                        items(characters) { character ->
+                            val isSelected = (character.id == selectedCharacterId)
+                            ButtonInfoCharacter(
+                                character = character, isSelected = isSelected, onClick = {
+                                    val newId = if (isSelected) "" else character.id
+                                    selectedCharacterId = newId
+                                    scope.launch {
+                                        val userPrefs = UserPreferences(context)
+                                        userPrefs.savePreferencesString(
+                                            key = "character_id", value = newId
+                                        )
+                                        Log.i("Selection", "Salvato ID: $newId")
+                                    }
+                                })
+                        }
                     }
-                }
-                if (characters.isEmpty()) {
-                    Text(
-                        text = stringResource(R.string.no_characters_message),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = stormbringer_primary,
-                    )
+                } else {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .padding(16.dp
+                    )) {
+                                Text(
+                                    text = stringResource(R.string.no_characters_message),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = stormbringer_primary,
+                                )
+                            }
+
                 }
 
             }

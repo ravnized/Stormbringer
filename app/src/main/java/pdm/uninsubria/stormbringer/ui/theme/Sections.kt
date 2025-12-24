@@ -24,6 +24,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +60,12 @@ fun SelectorMode() {
     val context = LocalContext.current
     var modeSelected by remember { mutableStateOf("PLAYER") }
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        UserPreferences(context).savePreferencesString(key = "player_mode",value = modeSelected)
+        Log.i("UI", "Modalità caricata: $modeSelected")
+    }
+
 
     Column(
         modifier = Modifier
@@ -99,20 +107,29 @@ fun SelectorMode() {
     }
 }
 
-
+@Preview
 @Composable
 fun NavigationBarSection(
-    headLine: String,
+    headLine: String = "Stormbringer",
     floatingActionButton: @Composable () -> Unit = {},
-    content: @Composable (PaddingValues) -> Unit,
-    currentTab: Int,
-    gameMode: String = "PLAYER"
+    content: @Composable (PaddingValues) -> Unit = {},
+    currentTab: Int = 0
 ) {
     val context = LocalContext.current
     val activity = context as? androidx.fragment.app.FragmentActivity
     var showProfileDialog by remember { mutableStateOf(false) }
     val auth = remember { FirebaseAuth.getInstance() }
     val scope = rememberCoroutineScope()
+    var gameMode by remember { mutableStateOf("PLAYER") }
+    var loaded by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        gameMode = UserPreferences(context).getPreferencesString("player_mode")
+        Log.i("NavigationBarSection", "Game mode: $gameMode")
+        loaded = true
+    }
+    if (!loaded) {
+        return
+    }
     Scaffold(
         containerColor = stormbringer_background_dark,
 

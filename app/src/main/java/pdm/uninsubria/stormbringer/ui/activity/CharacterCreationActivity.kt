@@ -1,7 +1,6 @@
 package pdm.uninsubria.stormbringer.ui.activity
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,19 +31,19 @@ import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.Character
 import pdm.uninsubria.stormbringer.tools.UserAction
 import pdm.uninsubria.stormbringer.tools.createCharacter
-import pdm.uninsubria.stormbringer.tools.saveGuestCharacterToPrefs
 import pdm.uninsubria.stormbringer.ui.fragments.CharacterManageFragment
 import pdm.uninsubria.stormbringer.ui.theme.ButtonActionPrimary
 import pdm.uninsubria.stormbringer.ui.theme.ControlButton
 import pdm.uninsubria.stormbringer.ui.theme.InputGeneral
 import pdm.uninsubria.stormbringer.ui.theme.glow_active
 import pdm.uninsubria.stormbringer.ui.theme.stormbringer_background_dark
-import java.util.UUID
 
 @Composable
 fun StormbringerCharacterCreation() {
     Surface(
-        modifier = Modifier.fillMaxSize().imePadding(), color = stormbringer_background_dark
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding(), color = stormbringer_background_dark
     ) {
         val db = remember { FirebaseFirestore.getInstance() }
         remember { FirebaseAuth.getInstance() }
@@ -52,7 +51,9 @@ fun StormbringerCharacterCreation() {
         val activity = context as? androidx.fragment.app.FragmentActivity
         val scrollState = rememberScrollState()
         Column(
-            modifier = Modifier.padding(16.dp).verticalScroll(scrollState),
+            modifier = Modifier
+                .padding(16.dp)
+                .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -77,7 +78,9 @@ fun StormbringerCharacterCreation() {
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(top = 16.dp, bottom = 16.dp).fillMaxWidth()
+                modifier = Modifier
+                    .padding(top = 16.dp, bottom = 16.dp)
+                    .fillMaxWidth()
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -110,12 +113,9 @@ fun StormbringerCharacterCreation() {
                 }
 
 
-
-
-
             }
 
-            val textToast = stringResource(R.string.character_creation_success)
+            stringResource(R.string.character_creation_success)
             val scope = rememberCoroutineScope()
             ButtonActionPrimary(
                 onClick = {
@@ -146,26 +146,7 @@ fun StormbringerCharacterCreation() {
                                 ?.commit()
 
                         }
-                    }else{
-                        Log.i("CharacterCreation", "Guest Mode: Saving locally")
-
-                        val guestId = UUID.randomUUID().toString()
-                        character = character.copy(id = guestId)
-
-                        scope.launch {
-                            saveGuestCharacterToPrefs(context, character)
-
-                            Toast.makeText(context, textToast, Toast.LENGTH_SHORT).show()
-
-
-                            activity?.supportFragmentManager?.beginTransaction()
-                                ?.setReorderingAllowed(true)
-                                ?.replace(R.id.fragment_container, CharacterManageFragment())
-                                ?.commit()
-                        }
-
                     }
-
 
                 })
 

@@ -1,10 +1,7 @@
 package pdm.uninsubria.stormbringer.tools
 
-import android.content.Context
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.tasks.await
 
 data class Character(
@@ -26,7 +23,6 @@ data class Character(
     var spells: List<String> = emptyList(),
     var background: String = "",
 ) {
-
 
 
     fun isDead() = !isAlive
@@ -127,8 +123,8 @@ suspend fun getCharacterById(
 ): Character? {
     return try {
         val charDoc =
-            db.collection("users").document(userUid).collection("characters")
-                .document(characterId).get().await()
+            db.collection("users").document(userUid).collection("characters").document(characterId)
+                .get().await()
 
         val character = charDoc.toObject(Character::class.java)
 
@@ -147,8 +143,8 @@ suspend fun getCharacterById(
         val usersSnapshot = db.collection("users").get().await()
 
         for (userDoc in usersSnapshot.documents) {
-            val charDoc = userDoc.reference.collection("characters")
-                .document(characterId).get().await()
+            val charDoc =
+                userDoc.reference.collection("characters").document(characterId).get().await()
 
             if (charDoc.exists()) {
                 val character = charDoc.toObject(Character::class.java)
@@ -165,22 +161,3 @@ suspend fun getCharacterById(
     }
 }
 
-suspend fun saveGuestCharacterToPrefs(context: Context, newCharacter: Character) {
-    val userPrefs = UserPreferences(context)
-    val gson = Gson()
-
-    val existingJson = userPrefs.getPreferencesString("guest_characters_list") ?: "[]"
-
-    val type = object : TypeToken<MutableList<Character>>() {}.type
-    val characterList: MutableList<Character> = try {
-        gson.fromJson(existingJson, type) ?: mutableListOf()
-    } catch (e: Exception) {
-        mutableListOf()
-    }
-
-    characterList.add(newCharacter)
-
-    val newJson = gson.toJson(characterList)
-    Log.i("CharacterCreation", "Saving guest characters list: $newJson")
-    userPrefs.savePreferencesString(key = "guest_characters_list", value = newJson)
-}

@@ -59,31 +59,7 @@ fun StormbringerCharacterEditActivity() {
         if (characterId.isNotEmpty() && userUid.isNotEmpty()) {
             character = getCharacterById(db = db, characterId = characterId, userUid = userUid)
         }
-        if (userUid.isEmpty() && characterId.isNotEmpty()) {
-            try {
-                val json = userPrefs.getPreferencesString("guest_characters_list") ?: "[]"
-                Log.i("CharacterManageActivity", "Guest Characters JSON: $json")
-                val type = object : TypeToken<List<Character>>() {}.type
-                characters = Gson().fromJson(json, type) ?: emptyList()
-                Log.i("CharacterEditActivity", "Guest Characters retrieved: $characters")
-                character = characters.find { character ->
-                    character.id == characterId
-                }
-                if (character != null) {
-                    Log.e("DEBUG_FIND", "SUCCESSO! Trovato: ${character?.name}")
-                } else {
-                    Log.e("DEBUG_FIND", "FALLITO. Nessuna corrispondenza trovata.")
-                    character = null
-                }
-            } catch (e: Exception) {
-                Log.e("DEBUG_FIND", "ERRORE: ${e.message}")
-            }
-        }
 
-        if (characterId.isEmpty()) {
-            Log.i("CharacterEditActivity", "No character ID found in preferences.")
-            character = null
-        }
 
 
     }

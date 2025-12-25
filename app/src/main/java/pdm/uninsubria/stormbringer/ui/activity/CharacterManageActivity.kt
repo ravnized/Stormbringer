@@ -27,8 +27,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.launch
 import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.Character
@@ -64,14 +62,6 @@ fun StormbringerCharacterManage() {
             selectedCharacterId = savedId
             Log.i("CharacterManageActivity", "Characters retrieved: $characters")
             Log.i("CharacterManageActivity", "Selected Character ID: $selectedCharacterId")
-        } else {
-            val json = userPrefs.getPreferencesString("guest_characters_list") ?: "[]"
-            Log.i("CharacterManageActivity", "Guest Characters JSON: $json")
-            val type = object : TypeToken<List<Character>>() {}.type
-            characters = Gson().fromJson(json, type) ?: emptyList()
-            Log.i("CharacterManageActivity", "Guest Characters retrieved: $characters")
-            val savedId = userPrefs.getPreferencesString("character_id") ?: ""
-            selectedCharacterId = savedId
         }
     }
 
@@ -132,15 +122,16 @@ fun StormbringerCharacterManage() {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .padding(16.dp
-                    )) {
-                                Text(
-                                    text = stringResource(R.string.no_characters_message),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = stormbringer_primary,
-                                )
-                            }
+                        modifier = Modifier.padding(
+                                16.dp
+                            )
+                    ) {
+                        Text(
+                            text = stringResource(R.string.no_characters_message),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = stormbringer_primary,
+                        )
+                    }
 
                 }
 

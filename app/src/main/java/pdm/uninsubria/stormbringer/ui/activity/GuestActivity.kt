@@ -7,13 +7,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
+import kotlinx.coroutines.launch
 import pdm.uninsubria.stormbringer.R
+import pdm.uninsubria.stormbringer.tools.UserAction
 import pdm.uninsubria.stormbringer.ui.fragments.CharacterManageFragment
 import pdm.uninsubria.stormbringer.ui.theme.ButtonActionPrimary
 import pdm.uninsubria.stormbringer.ui.theme.SelectorMode
@@ -22,6 +24,7 @@ import pdm.uninsubria.stormbringer.ui.theme.SelectorMode
 fun StormbringerGuestActivity() {
     val context = LocalContext.current
     val activity = context as? androidx.fragment.app.FragmentActivity
+    val scope = rememberCoroutineScope()
     Surface(
         modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
     ) {
@@ -34,20 +37,22 @@ fun StormbringerGuestActivity() {
             SelectorMode()
             ButtonActionPrimary(onClick = {
 
-                activity?.supportFragmentManager?.popBackStack(
-                    null,
-                    FragmentManager.POP_BACK_STACK_INCLUSIVE
-                )
+                scope.launch {
+                    UserAction(context).loginAsGuest()
+                    activity?.supportFragmentManager?.popBackStack(
+                        null, FragmentManager.POP_BACK_STACK_INCLUSIVE
+                    )
 
-                activity?.supportFragmentManager?.beginTransaction()
-                    ?.setReorderingAllowed(true)?.replace(
-                        R.id.fragment_container, CharacterManageFragment()
-                    )?.commit()
+                    activity?.supportFragmentManager?.beginTransaction()?.setReorderingAllowed(true)
+                        ?.replace(
+                            R.id.fragment_container, CharacterManageFragment()
+                        )?.commit()
+                }
+
+
             }, id = R.string.guest_continue_button)
         }
     }
-
-
 
 
 }

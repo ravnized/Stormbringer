@@ -139,25 +139,31 @@ suspend fun getCharacterById(
 suspend fun getCharacterById(
     db: FirebaseFirestore, characterId: String
 ): Character? {
-    return try {
-        val usersSnapshot = db.collection("users").get().await()
+    try {
+        Log.i("DB", "Searching via CollectionGroup for ID: $characterId")
 
-        for (userDoc in usersSnapshot.documents) {
-            val charDoc =
-                userDoc.reference.collection("characters").document(characterId).get().await()
+        val querySnapshot =
+            db.collectionGroup("characters").whereEqualTo("id", characterId).limit(1).get().await()
 
-            if (charDoc.exists()) {
-                val character = charDoc.toObject(Character::class.java)
-                Log.d("DB", "Fetched character: ${character?.name}")
-                return character
-            }
+        if (!querySnapshot.isEmpty) {
+
+            val doc = querySnapshot.documents.first()
+            val character = doc.toObject(Character::class.java)
+
+
+            val charWithId = character?.copy(id = doc.id)
+
+            Log.d("DB", "Found character: ${charWithId?.name}")
+            return charWithId
+        } else {
+            Log.d("DB", "Character not found")
+            return null
         }
 
-        Log.d("DB", "Character with ID $characterId not found")
-        null
     } catch (e: Exception) {
-        Log.e("DB", "Errore: ${e.message}")
-        null
+        Log.e("DB", "Errore ricerca: ${e.message}")
+
+        return null
     }
 }
 

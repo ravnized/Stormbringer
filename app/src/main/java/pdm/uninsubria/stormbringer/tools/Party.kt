@@ -113,21 +113,16 @@ suspend fun loadMultiplePartyInfoByGM(db: FirebaseFirestore, userUid: String): L
 
 suspend fun loadPartyInfoByCharacter(db: FirebaseFirestore, characterId: String): Party? {
     return try {
-        val usersSnapshot = db.collection("users").get().await()
+        val querySnapshot = db.collection("parties")
+            .whereArrayContains("members", characterId)
+            .limit(1)
+            .get()
+            .await()
 
-        for (userDoc in usersSnapshot.documents) {
-            val charDoc = userDoc.reference.collection("characters")
-                .document(characterId).get().await()
-
-            if (charDoc.exists()) {
-                val partyId = userDoc.getString("partyId")
-                if (!partyId.isNullOrEmpty()) {
-                    return loadPartyInfo(db, partyId)
-                } else {
-                    Log.e("PartyManager", "Il personaggio non è in nessun party")
-                    return null
-                }
-            }
+        if (!querySnapshot.isEmpty) {
+            val party = querySnapshot.documents.first().toObject(Party::class.java)
+            Log.i("PartyManager", "Trovato party per personaggio $characterId")
+            return party
         }
 
         Log.e("PartyManager", "Personaggio con ID $characterId non trovato")

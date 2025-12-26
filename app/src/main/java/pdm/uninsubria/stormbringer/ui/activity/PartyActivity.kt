@@ -81,6 +81,7 @@ fun StormbringerPartyActivity() {
     var parties: List<Party> by remember { mutableStateOf(emptyList<Party>()) }
     var showSheet by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
+    var charactersInParty by remember { mutableStateOf<List<Character>>(emptyList()) }
     LaunchedEffect(Unit) {
         val characterId = userPreferences.getPreferencesString("character_id")
         val savedMode = userPreferences.getPreferencesString("player_mode")
@@ -89,11 +90,16 @@ fun StormbringerPartyActivity() {
             if (loadedParty != null) {
                 party = loadedParty
             }
-
+            Log.i("PartyActivity", "Loaded party for character $characterId: ${party.id}")
 
             if (savedMode.isNotEmpty()) {
                 mode = savedMode
             }
+
+            charactersInParty = party.members.mapNotNull { memberId ->
+                getCharacterById(db = db, characterId = memberId)
+            }
+
             showTextSelect = false
         } else if (savedMode == "GM") {
             val userUid = auth.currentUser?.uid ?: ""
@@ -152,7 +158,7 @@ fun StormbringerPartyActivity() {
                             textAlign = TextAlign.Center
                         )
                     } else {
-                        playerScreen(partyId = party.id)
+                        PlayerScreen(partyId = party.id, partyInfo = party, characters = charactersInParty)
                     }
 
                 }
@@ -283,7 +289,7 @@ fun CreatePartyForm(onCancel: () -> Unit, onClick: (String) -> Unit) {
 }
 
 @Composable
-fun playerScreen(partyId: String = "") {
+fun PlayerScreen(partyId: String = "" , partyInfo: Party = Party(), characters: List<Character> = emptyList()) {
     val scope = rememberCoroutineScope()
     val partycode = rememberTextFieldState(initialText = "")
     val context = LocalContext.current
@@ -357,23 +363,11 @@ fun playerScreen(partyId: String = "") {
 
         }
     } else {
-        var characters: List<Character> = remember { mutableListOf<Character>() }
-        val scope = rememberCoroutineScope()
-        var party: Party = remember { Party() }
-        var selectedCharacterId by remember { mutableStateOf("") }
-        scope.launch {
-            party = loadPartyInfo(db = FirebaseFirestore.getInstance(), partyId = partyId)!!
-            //load characters
-            characters = party.members.mapNotNull { memberId ->
-                val character = getCharacterById(
-                    db = FirebaseFirestore.getInstance(), characterId = memberId
-                )
-                character
-            }
 
-            selectedCharacterId = UserPreferences(context).getPreferencesString("character_id")
-        }
-        //party info screen and list of members
+        var selectedCharacterId by remember { mutableStateOf("") }
+
+
+
         Column(
             modifier = Modifier
                 .fillMaxSize()

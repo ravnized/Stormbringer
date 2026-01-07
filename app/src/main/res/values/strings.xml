@@ -54,7 +54,10 @@
     <string name="upload_from_gallery">Upload from gallery</string>
     <string name="upload_from_gallery_subtitle">Select your custom image</string>
     <string name="cancel">Cancel</string>
-    <string name="party_manager">Manage Party</string>
-    <string name="multiple_parties">Parties</string>
+    <string name="party_manager">Party</string>
+    <string name="multiple_parties">Parties Manage</string>
     <string name="add_party_button">Create a party</string>
+    <string name="select_dice_sides">Select Roll Dice</string>
+    <string name="result">Result</string>
+    <string name="reroll">Reroll</string>
 </resources>

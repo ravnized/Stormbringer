@@ -1,6 +1,7 @@
 package pdm.uninsubria.stormbringer.ui.activity
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,6 +30,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -63,6 +65,7 @@ import pdm.uninsubria.stormbringer.ui.theme.ButtonActionPrimary
 import pdm.uninsubria.stormbringer.ui.theme.ButtonInfoCharacter
 import pdm.uninsubria.stormbringer.ui.theme.ButtonInfoParty
 import pdm.uninsubria.stormbringer.ui.theme.CustomBottomSheet
+import pdm.uninsubria.stormbringer.ui.theme.DiceRollDialog
 import pdm.uninsubria.stormbringer.ui.theme.InputGeneral
 import pdm.uninsubria.stormbringer.ui.theme.NavigationBarSection
 import pdm.uninsubria.stormbringer.ui.theme.stormbringer_background_dark
@@ -87,7 +90,9 @@ fun StormbringerPartyActivity() {
     var charactersInParty by remember { mutableStateOf<List<Character>>(emptyList()) }
     var selectedPartyId by remember { mutableStateOf("") }
     var showEdit by remember { mutableStateOf(false) }
-
+    var showRoll by remember { mutableStateOf(false) }
+    var selectedSidesRoll by remember { mutableIntStateOf(6) }
+    var showSides by remember { mutableStateOf(false) }
     fun loadData(){
         scope.launch {
             val characterId = userPreferences.getPreferencesString("character_id")
@@ -154,6 +159,23 @@ fun StormbringerPartyActivity() {
 
 
             }
+        }else{
+            FloatingActionButton(
+                onClick = {
+                    //edit party
+                    showSides = true
+                },
+                containerColor = stormbringer_primary,
+                contentColor = stormbringer_background_dark,
+                shape = CircleShape
+            ) {
+
+                Icon(
+                    painter = painterResource(R.drawable.casino_24px), contentDescription = "roll"
+                )
+
+
+            }
         }
     }, currentTab = if (mode == "GM") 0 else 2, content = { innerPadding ->
         Column(
@@ -198,6 +220,54 @@ fun StormbringerPartyActivity() {
             }
         }
     })
+
+
+
+        CustomBottomSheet(
+            isVisible = showSides, onDismiss = { showSides = false }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+                    .imePadding()
+            ) {
+                Text(
+                    text = stringResource(R.string.select_dice_sides),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = stormbringer_primary,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                val sidesOptions = listOf(4, 6, 8, 10, 12, 20, 100)
+
+                sidesOptions.forEach { sides ->
+                    Button(
+                        onClick = {
+                            selectedSidesRoll = sides
+                            showSides = false
+                            showRoll = true
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = stormbringer_primary),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                    ) {
+                        Text("D$sides", color = Color.Black)
+                    }
+                }
+            }
+        }
+
+
+        if(showRoll) {
+            DiceRollDialog(
+                sides = selectedSidesRoll,
+                onDismiss = { showRoll = false }
+            )
+        }
+
+
+
     CustomBottomSheet(
         isVisible = showSheet, onDismiss = { showSheet = false }) {
         // Contenuto del form
@@ -415,30 +485,28 @@ fun PlayerScreen(partyId: String = "" , partyInfo: Party = Party(), characters: 
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = partyInfo.name,
-                style = MaterialTheme.typography.bodyLarge,
+                text = "Name: " + partyInfo.name,
+                style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(bottom = 16.dp),
                 textAlign = TextAlign.Center
             )
 
+            Text(
+                text = "${stringResource(R.string.party_code_label)}: $partyId",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(bottom = 8.dp),
+                textAlign = TextAlign.Center
+            )
             Text(
                 text = "Members: ${partyInfo.members.size}",
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(bottom = 8.dp),
                 textAlign = TextAlign.Center
             )
-
-            Text(
-                text = "${stringResource(R.string.party_code_label)}: $partyId",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = 8.dp),
-                textAlign = TextAlign.Center
-            )
-
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
 

@@ -330,3 +330,5 @@ suspend fun getImageFromUrl(imageUrl: String): Bitmap? {
     }
 }
 
+
+

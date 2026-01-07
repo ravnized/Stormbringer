@@ -139,7 +139,7 @@ fun NavigationBarSection(
                 color = stormbringer_background_dark,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 10.dp)
+                    .padding(top = 25.dp)
             ) {
                 Row(
                     modifier = Modifier
@@ -204,10 +204,10 @@ fun NavigationBarSection(
                         icon = {
                             Icon(
                                 painter = painterResource(R.drawable.brush_24px),
-                                contentDescription = "Manage Heroes"
+                                contentDescription = "Manage Hero"
                             )
                         },
-                        label = { Text("Manage Heroes") },
+                        label = { Text("Manage Hero") },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = stormbringer_primary,
                             indicatorColor = stormbringer_primary.copy(alpha = 0.2f)
@@ -246,7 +246,7 @@ fun NavigationBarSection(
                         icon = {
                             Icon(
                                 painter = painterResource(R.drawable.sailing_24px),
-                                contentDescription = "Party Manager"
+                                contentDescription = "Parties Manage"
                             )
                         },
                         label = { Text(stringResource(R.string.multiple_parties)) },
@@ -269,7 +269,7 @@ fun NavigationBarSection(
                         icon = {
                             Icon(
                                 painter = painterResource(R.drawable.wand_shine_24px),
-                                contentDescription = "Party Manage"
+                                contentDescription = "Party"
                             )
                         },
                         label = { Text(stringResource(R.string.party_title)) },
@@ -296,7 +296,7 @@ fun NavigationBarSection(
 
     if (showProfileDialog) {
         ProfileDialog(
-            email = auth.currentUser?.email ?: "Ospite",
+            email = auth.currentUser?.email ?: stringResource(R.string.guest_access_title),
             onDismiss = { showProfileDialog = false },
             onLogout = {
                 showProfileDialog = false

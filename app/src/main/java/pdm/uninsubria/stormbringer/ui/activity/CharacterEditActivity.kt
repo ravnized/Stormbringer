@@ -6,11 +6,17 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -28,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -46,6 +53,7 @@ import pdm.uninsubria.stormbringer.ui.theme.CustomProfileImageCircle
 import pdm.uninsubria.stormbringer.ui.theme.ExperienceBar
 import pdm.uninsubria.stormbringer.ui.theme.ImageSourceOptionDialog
 import pdm.uninsubria.stormbringer.ui.theme.NavigationBarSection
+import pdm.uninsubria.stormbringer.ui.theme.StatControl
 import pdm.uninsubria.stormbringer.ui.theme.stormbringer_background_dark
 import pdm.uninsubria.stormbringer.ui.theme.stormbringer_primary
 import pdm.uninsubria.stormbringer.ui.theme.white_70
@@ -82,6 +90,22 @@ fun StormbringerCharacterEditActivity() {
             }
         }
     }
+
+    fun updateField(field: String, value: Any, newCharState: Character ) {
+        character = newCharState
+        scope.launch {
+            changeCharInfo(
+                db = db,
+                userUid = userUid,
+                characterId = character?.id ?: "",
+                field = field,
+                value = value
+            )
+        }
+    }
+
+
+
     LaunchedEffect(Unit) {
         loadAllData()
 
@@ -139,102 +163,11 @@ fun StormbringerCharacterEditActivity() {
                         Text(stringResource(R.string.no_heroes_selected), color = white_70)
                     } else {
 
-                        CustomProfileImageCircle(
-                            data = currentChar.image,
-                            borderColor = stormbringer_primary,
-                            onShow = { showSourceDialog = true },
-                            isEditable = true,
-                        )
-                        Text(
-                            text = currentChar.name,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = stormbringer_primary,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        Text(
-                            text = "class: ${currentChar.characterClass}",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = white_70,
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        )
-
-                        ExperienceBar(currentChar.xp, currentChar.level)
-
-                        BiographyText(
-                            bio = currentChar.bio,
-                            isEditable = visibilityMod,
-                            onBioChange = { newBio ->
-                                scope.launch {
-                                    character = currentChar.copy(bio = newBio)
-                                    changeCharInfo(
-                                        db = db,
-                                        userUid = userUid,
-                                        characterId = currentChar.id,
-                                        field = "bio",
-                                        value = newBio
-                                    )
-
-                                }
-                            })
-
-
-
-
-                        Row(
-                            modifier = Modifier
-                                .padding(top = 16.dp)
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-
-                            ControlButton(
-                                text = "HP",
-                                currentValue = currentChar.hp,
-                                maxValue = 100,
-                                onChange = { value ->
-                                    scope.launch {
-                                        character = currentChar.copy(hp = value)
-                                        changeCharInfo(
-                                            db = db,
-                                            userUid = userUid,
-                                            characterId = currentChar.id,
-                                            field = "hp",
-                                            value = value
-                                        )
-
-                                    }
-                                },
-                                visibility = visibilityMod
-                            )
-                            ControlButton(
-                                text = "MP",
-                                currentValue = currentChar.mp,
-                                maxValue = 100,
-                                onChange = { value ->
-                                    scope.launch {
-                                        character = currentChar.copy(mp = value)
-                                        changeCharInfo(
-                                            db = db,
-                                            userUid = userUid,
-                                            characterId = currentChar.id,
-                                            field = "mp",
-                                            value = value
-                                        )
-
-                                    }
-                                },
-                                visibility = visibilityMod
-                            )
-                        }
-
 
                         val galleryLauncher = rememberLauncherForActivityResult(
                             contract = ActivityResultContracts.GetContent()
                         ) { uri: Uri? ->
                             uri?.let {
-                                // Handle the selected image URI
-
                                 scope.launch {
                                     isLoading = true
                                     val success = uploadCharacterImage(
@@ -244,22 +177,13 @@ fun StormbringerCharacterEditActivity() {
                                         characterId = currentChar.id,
                                         imageUri = uri
                                     )
-
                                     if (success) {
                                         loadAllData()
-                                    } else {
-                                        isLoading = false
-                                        Toast.makeText(
-                                            context,
-                                            "Errore caricamento",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
                                     }
+                                    isLoading = false
                                 }
-
                             }
                         }
-
 
                         if (showSourceDialog) {
                             ImageSourceOptionDialog(
@@ -272,25 +196,115 @@ fun StormbringerCharacterEditActivity() {
                                     showSourceDialog = false
                                     scope.launch {
                                         isLoading = true
-                                        val success = generateCharacterImage(
-                                            db = db,
-                                            userUid = userUid,
-                                            character = currentChar
-                                        )
-                                        if (success) {
-                                            loadAllData()
-                                        } else {
-                                            isLoading = false
-                                            Toast.makeText(
-                                                context,
-                                                "Errore generazione immagine",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
-
+                                        generateCharacterImage(db, userUid, currentChar)
+                                        isLoading = false
                                     }
-                                })
+                                }
+                            )
                         }
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .padding(bottom = 80.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+
+                            // 1. HEADER (Immagine e Info Base)
+                            Box(modifier = Modifier.padding(top = 24.dp)) {
+                                CustomProfileImageCircle(
+                                    data = currentChar.image,
+                                    borderColor = stormbringer_primary,
+                                    onShow = { if (visibilityMod) showSourceDialog = true },
+                                    isEditable = visibilityMod,
+                                )
+                            }
+
+                            Text(
+                                text = currentChar.name,
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = stormbringer_primary,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(top = 16.dp)
+                            )
+
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "Lvl. ${currentChar.level}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = white_70,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = " | ${currentChar.characterClass}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = white_70
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(24.dp))
+
+
+                            ExperienceBar(currentChar.xp, currentChar.level)
+
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            Text(
+                                text = "Attributes",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = white_70,
+                                modifier = Modifier.align(Alignment.Start).padding(start = 16.dp, bottom = 8.dp)
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                ControlButton(
+                                    text = "HP",
+                                    currentValue = currentChar.hp,
+                                    maxValue = 100,
+                                    visibility = visibilityMod,
+                                    onChange = { updateField("hp", it, newCharState = character!!.copy(hp=it) ) }
+                                )
+                                ControlButton(
+                                    text = "MP",
+                                    currentValue = currentChar.mp,
+                                    maxValue = 100,
+                                    visibility = visibilityMod,
+                                    onChange = { updateField("mp", it,newCharState = character!!.copy(mp=it)) }
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    StatControl("STR", currentChar.strength, visibilityMod) { updateField("strength", it, character!!.copy(strength = it)) }
+                                    StatControl("DEX", currentChar.dexterity, visibilityMod) { updateField("dexterity", it, character!!.copy(dexterity = it)) }
+                                    StatControl("INT", currentChar.intelligence, visibilityMod) { updateField("intelligence", it, character!!.copy(intelligence = it)) }
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                                    StatControl("WIS", currentChar.wisdom, visibilityMod) { updateField("wisdom", it, character!!.copy(wisdom = it)) }
+                                    StatControl("CHA", currentChar.charisma, visibilityMod) { updateField("charisma", it, character!!.copy(charisma = it)) }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(32.dp))
+
+                            Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                                BiographyText(
+                                    bio = currentChar.bio,
+                                    isEditable = visibilityMod,
+                                    onBioChange = { updateField("bio", it, character!!.copy(bio = it)) }
+                                )
+                            }
+                        }
+
+
+
                     }
 
 

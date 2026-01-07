@@ -189,7 +189,9 @@ fun StormbringerPartyActivity() {
                             textAlign = TextAlign.Center
                         )
                     } else {
-                        PlayerScreen(partyId = party.id, partyInfo = party, characters = charactersInParty)
+                        PlayerScreen(partyId = party.id, partyInfo = party, characters = charactersInParty, onAddPartyClick = {
+                            loadData()
+                        })
                     }
 
                 }
@@ -329,7 +331,7 @@ fun CreatePartyForm(onCancel: () -> Unit, onClick: (String) -> Unit) {
 }
 
 @Composable
-fun PlayerScreen(partyId: String = "" , partyInfo: Party = Party(), characters: List<Character> = emptyList()) {
+fun PlayerScreen(partyId: String = "" , partyInfo: Party = Party(), characters: List<Character> = emptyList(), onAddPartyClick: () -> Unit) {
     val scope = rememberCoroutineScope()
     val partycode = rememberTextFieldState(initialText = "")
     val context = LocalContext.current
@@ -378,6 +380,7 @@ fun PlayerScreen(partyId: String = "" , partyInfo: Party = Party(), characters: 
                             //failed to join party
                             showDialog = true
                         }
+                        onAddPartyClick()
                     }
                 },
                 modifier = Modifier

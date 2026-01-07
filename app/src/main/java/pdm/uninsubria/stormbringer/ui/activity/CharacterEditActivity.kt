@@ -67,7 +67,6 @@ fun StormbringerCharacterEditActivity() {
     var showAiInputForm by remember { mutableStateOf(false) }
     val userUid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
     var doneUploading by remember { mutableStateOf(false) }
-    var bitmapImg: Bitmap? by remember { mutableStateOf(null as Bitmap?) }
     var isLoading by remember { mutableStateOf(true) }
 
     fun loadAllData() {
@@ -81,13 +80,6 @@ fun StormbringerCharacterEditActivity() {
                     val fetchedChar = getCharacterById(db = db, characterId = characterId, userUid = userUid)
                     character = fetchedChar
 
-
-                    if (fetchedChar != null && fetchedChar.image.isNotEmpty()) {
-                        val bitmap = getImageFromUrl(fetchedChar.image)
-                        bitmapImg = bitmap
-                    } else {
-                        bitmapImg = null
-                    }
                 }
             } catch (e: Exception) {
                 Log.e("LoadData", "Errore caricamento dati: ${e.message}")
@@ -153,7 +145,7 @@ fun StormbringerCharacterEditActivity() {
                         CircularProgressIndicator(color = stormbringer_primary)
                     }else{
                         CustomProfileImageCircle(
-                            data = bitmapImg,
+                            data = currentChar.image,
                             borderColor = stormbringer_primary,
                             onShow = { showSourceDialog = true },
                         )
@@ -271,7 +263,15 @@ fun StormbringerCharacterEditActivity() {
                                 onGenerateClick = {
                                     showSourceDialog = false
                                     scope.launch {
-                                        generateCharacterImage(db = db, userUid = userUid, character = currentChar)
+                                        isLoading = true
+                                        val success = generateCharacterImage(db = db, userUid = userUid, character = currentChar)
+                                        if (success) {
+                                            loadAllData()
+                                        } else {
+                                            isLoading = false
+                                            Toast.makeText(context, "Errore generazione immagine", Toast.LENGTH_SHORT).show()
+                                        }
+
                                     }
                                 }
                             )

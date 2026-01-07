@@ -115,7 +115,7 @@ fun PartyManageActivity() {
                     Text(
                         text = stringResource(R.string.party_members_list),
                         modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
                     )
 
                     list_members.forEach {

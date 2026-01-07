@@ -63,10 +63,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import coil3.compose.AsyncImage
-import coil3.request.CachePolicy
-import coil3.request.ImageRequest
-import coil3.request.crossfade
+import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import pdm.uninsubria.stormbringer.R
@@ -280,7 +279,8 @@ fun CustomBottomSheet(
 fun CustomProfileImageCircle(
     data: Any?,
     borderColor: Color = Color(0xFFD4AF37),
-    onShow: () -> Unit
+    onShow: () -> Unit = {},
+    isEditable: Boolean = true
 ) {
 
     Box(
@@ -317,30 +317,33 @@ fun CustomProfileImageCircle(
                 placeholder = painterResource(R.drawable.account_circle_24px),
                 error = painterResource(R.drawable.close_24px)
             )
+
+
         }
+        if(isEditable) {
 
-
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .offset(x = (-4).dp, y = (-4).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-                .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape)
-                .size(32.dp)
-                .clickable(
-                    onClick = {
-                        onShow()
-                    }
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.edit_24px),
-                contentDescription = "Change Image",
-                tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(18.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .offset(x = (-4).dp, y = (-4).dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape)
+                    .size(32.dp)
+                    .clickable(
+                        onClick = {
+                            onShow()
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.edit_24px),
+                    contentDescription = "Change Image",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
         }
     }
 
@@ -357,10 +360,10 @@ fun ImageSourceOptionDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surfaceVariant, // O il tuo stormbringer_surface_dark
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         title = {
             Text(
-                text = "Modifica Avatar",
+                text = stringResource(R.string.select_modify_avatar),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -370,23 +373,23 @@ fun ImageSourceOptionDialog(
 
                 SourceOptionItem(
                     icon = painterResource(R.drawable.wand_shine_24px),
-                    title = "Genera con AI",
-                    subtitle = "Crea un avatar unico dalla descrizione",
+                    title = stringResource(R.string.generate_avatar_ai),
+                    subtitle = stringResource(R.string.generate_avatar_ai_subtitle),
                     onClick = onGenerateClick
                 )
 
 
                 SourceOptionItem(
                     icon = painterResource(id = R.drawable.cloud_upload_24px),
-                    title = "Scegli dalla Galleria",
-                    subtitle = "Carica un'immagine dal dispositivo",
+                    title = stringResource(R.string.upload_from_gallery),
+                    subtitle = stringResource(R.string.upload_from_gallery_subtitle),
                     onClick = onGalleryClick
                 )
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Annulla")
+                Text(text = stringResource(R.string.cancel).uppercase())
             }
         }
     )

@@ -1,32 +1,47 @@
 package pdm.uninsubria.stormbringer.ui.theme
 
+import android.graphics.Color
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.draw.innerShadow
 import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.Character
 import pdm.uninsubria.stormbringer.tools.Party
@@ -35,61 +50,96 @@ import pdm.uninsubria.stormbringer.tools.Party
 @Composable
 fun ButtonInfoCharacter(
     onClick: () -> Unit = {},
-    character: Character = Character(name = "Gandalf"),
+    character: Character = Character(name = "Gandalf", characterClass = "Wizard"), // Esempio dati
     isSelected: Boolean = false
 ) {
-    val glowModifier = if (isSelected) {
-        Modifier
-            .innerShadow(
-                shape = RoundedCornerShape(16.dp), shadow = Shadow(
-                    color = glow_subtle,
-                    spread = 1.dp,
-                    radius = 16.dp,
-                )
-            )
-            .dropShadow(
-                shape = RoundedCornerShape(16.dp), shadow = Shadow(
-                    color = glow_subtle,
-                    spread = 1.dp,
-                    radius = 16.dp,
-                )
-            )
-    } else {
-        Modifier
-    }
-    Box(
-        contentAlignment = Alignment.Center,
-        propagateMinConstraints = true,
-        modifier = Modifier
-            .then(glowModifier)
-            .background(
-                color = stormbringer_surface_dark, shape = RoundedCornerShape(16.dp)
-            )
-            .height(100.dp),
-        content = {
-            Button(
-                enabled = true, shape = RoundedCornerShape(16.dp), colors = ButtonColors(
-                    containerColor = stormbringer_surface_dark,
-                    contentColor = stormbringer_background_dark,
-                    disabledContainerColor = white_20,
-                    disabledContentColor = white_20
-                ),
 
-                onClick = {
-                    onClick()
-                }, modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(), content = {
-                    //row with a image of the character on the left and info on the right
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        //get image from firebase?
-                        Text(text = character.name, color = white_70)
-                    }
-                })
-        })
+    val borderStroke = if (isSelected) {
+        BorderStroke(2.dp, glow_subtle)
+    } else {
+        BorderStroke(1.dp, white_20)
+    }
+
+
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = stormbringer_surface_dark,
+        border = borderStroke,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(90.dp)
+            .padding(vertical = 4.dp),
+        shadowElevation = if (isSelected) 8.dp else 2.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(64.dp)
+                    .border(
+                        width = if (isSelected) 2.dp else 1.dp,
+                        color = if (isSelected) glow_subtle else white_20,
+                        shape = CircleShape
+                    )
+                    .padding(2.dp)
+                    .clip(CircleShape)
+            ) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(character.image)
+                        .crossfade(true)
+                        .diskCachePolicy(CachePolicy.ENABLED)
+                        .build(),
+                    contentDescription = "Avatar di ${character.name}",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                    placeholder = painterResource(R.drawable.account_circle_24px),
+                    error = painterResource(R.drawable.close_24px)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = character.name,
+                    color = if (isSelected) glow_subtle else white_70,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1
+                )
+
+
+                Text(
+                    text = character.characterClass,
+                    color = white_70,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontSize = 12.sp
+                )
+            }
+
+
+            if (isSelected) {
+                Icon(
+                    painter = painterResource(R.drawable.check_circle_24px),
+                    contentDescription = "Selected",
+                    tint = glow_subtle,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    }
 }
 
 @Preview

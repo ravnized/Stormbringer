@@ -148,6 +148,7 @@ fun StormbringerCharacterEditActivity() {
                             data = currentChar.image,
                             borderColor = stormbringer_primary,
                             onShow = { showSourceDialog = true },
+                            isEditable = true,
                         )
                         Text(
                             text = currentChar.name,

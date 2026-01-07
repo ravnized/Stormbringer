@@ -48,4 +48,10 @@
     <string name="no_party_members">No Members in this party</string>
     <string name="bio_placeholder">No biography for the character</string>
     <string name="bio_title">Biography</string>
+    <string name="select_modify_avatar">Modify Avatar</string>
+    <string name="generate_avatar_ai">Generate with AI\n</string>
+    <string name="generate_avatar_ai_subtitle">Generate an Image by the biography</string>
+    <string name="upload_from_gallery">Upload from gallery</string>
+    <string name="upload_from_gallery_subtitle">Select your custom image</string>
+    <string name="cancel">Cancel</string>
 </resources>

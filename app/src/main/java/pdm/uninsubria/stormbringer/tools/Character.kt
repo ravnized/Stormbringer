@@ -1,8 +1,21 @@
 package pdm.uninsubria.stormbringer.tools
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.util.Log
+import com.google.firebase.Firebase
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.ByteArrayOutputStream
 
 data class Character(
     val id: String = "",
@@ -21,7 +34,7 @@ data class Character(
     var charisma: Int = 0,
     var inventory: List<String> = emptyList(),
     var spells: List<String> = emptyList(),
-    var background: String = "",
+    var bio: String = "",
 ) {
 
 
@@ -164,6 +177,156 @@ suspend fun getCharacterById(
         Log.e("DB", "Errore ricerca: ${e.message}")
 
         return null
+    }
+}
+
+suspend fun uploadCharacterImage(
+    storage: FirebaseStorage, db: FirebaseFirestore ,userUid: String, characterId: String, imageUri: Uri
+): Boolean {
+    return try {
+        val fileName = "user_upload_${System.currentTimeMillis()}.jpg"
+        val storageRef = storage.reference
+            .child("characters")
+            .child(userUid)
+            .child(characterId)
+            .child(fileName)
+
+        storageRef.putFile(imageUri).await()
+        val downloadUrl = storageRef.downloadUrl.await()
+        downloadUrl.toString()
+
+        if(downloadUrl!=null){
+
+            try {
+                val charRef =
+                    db.collection("users").document(userUid).collection("characters")
+                        .document(characterId)
+
+                charRef.update("image", downloadUrl.toString()).await()
+                Log.d("DB", "Image uploaded and URL updated: $downloadUrl")
+                true
+            }catch (e: Exception) {
+                Log.e("DB", "Errore aggiornamento URL immagine: ${e.message}")
+                return false
+            }
+
+        }else{
+            false
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
+    }
+}
+
+
+suspend fun uploadCharacterImageAI(
+    storage: FirebaseStorage,
+    db: FirebaseFirestore,
+    userUid: String,
+    characterId: String,
+    bitmap: Bitmap
+): Boolean {
+    return try {
+
+        val baos = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, baos)
+        val data = baos.toByteArray()
+        val fileName = "ai_generated_${System.currentTimeMillis()}.jpg"
+        val storageRef = storage.reference
+            .child("characters")
+            .child(userUid)
+            .child(characterId)
+            .child(fileName)
+        storageRef.putBytes(data).await()
+
+        val downloadUrl = storageRef.downloadUrl.await()
+
+        if (downloadUrl != null) {
+            try {
+                val charRef = db.collection("users")
+                    .document(userUid)
+                    .collection("characters")
+                    .document(characterId)
+
+                charRef.update("image", downloadUrl.toString()).await()
+                Log.d("DB", "AI Image uploaded and URL updated: $downloadUrl")
+                true
+            } catch (e: Exception) {
+                Log.e("DB", "Errore aggiornamento DB: ${e.message}")
+                false
+            }
+        } else {
+            false
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        Log.e("DB", "Errore upload Storage: ${e.message}")
+        false
+    }
+}
+
+suspend fun generateCharacterImage(
+    db: FirebaseFirestore, userUid: String, character: Character
+): Boolean {
+    val ai = Firebase.ai(backend = GenerativeBackend.vertexAI())
+    val model = ai.imagenModel("imagen-4.0-generate-001")
+    val prompt = """
+            A high quality, detailed digital art character portrait of a ${character.characterClass}.
+            Character description: ${character.bio}.
+            Fantasy style, epic lighting, ratio square, centered composition.
+        """
+
+    Log.i("DB", "Generating image with prompt: $prompt")
+    val imageResponse = model.generateImages(prompt)
+    val image = imageResponse.images.first()
+
+    val bitmapImage = image.asBitmap()
+    return try {
+        val storage = FirebaseStorage.getInstance()
+        //save image to storage and update character image url
+
+        val success = uploadCharacterImageAI(storage =  storage, db = db, userUid = userUid, characterId = character.id, bitmap = bitmapImage)
+
+        if (success) {
+            Log.i("DB", "Prompt immagine aggiornato con successo")
+        } else {
+            Log.e("DB", "Errore nell'upload dell'immagine generata")
+            throw error("Upload failed")
+        }
+        true
+    } catch (e: Exception) {
+        Log.e("DB", "Errore aggiornamento prompt immagine: ${e.message}")
+        false
+    }
+}
+
+suspend fun getImageFromUrl(imageUrl: String): Bitmap? {
+    return withContext(Dispatchers.IO) {
+        try {
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .url(imageUrl)
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    Log.e("ImageFetch", "Errore server: ${response.code}")
+                    return@withContext null
+                }
+
+                val inputStream = response.body?.byteStream()
+                if (inputStream != null) {
+                    BitmapFactory.decodeStream(inputStream)
+                } else {
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.e("ImageFetch", "Eccezione: ${e.message ?: "Errore sconosciuto (probabilmente Thread o SSL)"}")
+            null
+        }
     }
 }
 

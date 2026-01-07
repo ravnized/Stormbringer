@@ -1,7 +1,10 @@
 package pdm.uninsubria.stormbringer.ui.activity
 
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,14 +26,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.Character
 import pdm.uninsubria.stormbringer.tools.Party
 import pdm.uninsubria.stormbringer.tools.UserPreferences
 import pdm.uninsubria.stormbringer.tools.getCharacterById
 import pdm.uninsubria.stormbringer.tools.loadPartyInfo
+import pdm.uninsubria.stormbringer.tools.uploadCharacterImage
 import pdm.uninsubria.stormbringer.ui.theme.ButtonActionPrimary
 import pdm.uninsubria.stormbringer.ui.theme.CustomBottomSheet
+import pdm.uninsubria.stormbringer.ui.theme.ImageSourceOptionDialog
 import pdm.uninsubria.stormbringer.ui.theme.stormbringer_primary
 
 @Composable
@@ -42,6 +48,7 @@ fun PartyManageActivity() {
     var partyInfo by remember { mutableStateOf(Party()) }
     var showBottomSheet by remember { mutableStateOf(false) }
     var list_members by remember { mutableStateOf(listOf<Character>()) }
+
     LaunchedEffect(Unit) {
         partyId = UserPreferences(context).getPreferencesString("current_party_id")
         Log.i("PartyManageActivity", "Loaded Party ID: $partyId")
@@ -123,6 +130,9 @@ fun PartyManageActivity() {
 
 
             }
+
+
+
 
 
         }

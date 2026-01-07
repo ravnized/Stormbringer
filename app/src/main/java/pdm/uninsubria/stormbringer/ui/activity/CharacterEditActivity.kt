@@ -1,12 +1,18 @@
 package pdm.uninsubria.stormbringer.ui.activity
 
+import android.graphics.Bitmap
+import android.net.Uri
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -24,8 +30,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.createBitmap
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.launch
@@ -33,9 +41,15 @@ import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.Character
 import pdm.uninsubria.stormbringer.tools.UserPreferences
 import pdm.uninsubria.stormbringer.tools.changeCharInfo
+import pdm.uninsubria.stormbringer.tools.generateCharacterImage
 import pdm.uninsubria.stormbringer.tools.getCharacterById
+import pdm.uninsubria.stormbringer.tools.getImageFromUrl
+import pdm.uninsubria.stormbringer.tools.uploadCharacterImage
+import pdm.uninsubria.stormbringer.ui.theme.BiographyText
 import pdm.uninsubria.stormbringer.ui.theme.ControlButton
+import pdm.uninsubria.stormbringer.ui.theme.CustomProfileImageCircle
 import pdm.uninsubria.stormbringer.ui.theme.ExperienceBar
+import pdm.uninsubria.stormbringer.ui.theme.ImageSourceOptionDialog
 import pdm.uninsubria.stormbringer.ui.theme.NavigationBarSection
 import pdm.uninsubria.stormbringer.ui.theme.stormbringer_background_dark
 import pdm.uninsubria.stormbringer.ui.theme.stormbringer_primary
@@ -49,18 +63,41 @@ fun StormbringerCharacterEditActivity() {
     val scope = rememberCoroutineScope()
     val db = remember { FirebaseFirestore.getInstance() }
     val userPreferences = UserPreferences(context)
-    LaunchedEffect(Unit) {
+    var showSourceDialog by remember { mutableStateOf(false) }
+    var showAiInputForm by remember { mutableStateOf(false) }
+    val userUid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+    var doneUploading by remember { mutableStateOf(false) }
+    var bitmapImg: Bitmap? by remember { mutableStateOf(null as Bitmap?) }
+    var isLoading by remember { mutableStateOf(true) }
 
-        val characterId = userPreferences.getPreferencesString("character_id")
-        Log.i("CharacterEditActivity", "Character ID: $characterId")
-        val userUid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-        val userPrefs = UserPreferences(context)
-        var characters: List<Character> = emptyList()
-        if (characterId.isNotEmpty() && userUid.isNotEmpty()) {
-            character = getCharacterById(db = db, characterId = characterId, userUid = userUid)
+    fun loadAllData() {
+        scope.launch {
+            isLoading = true // 1. Attiva il loader
+
+            val characterId = userPreferences.getPreferencesString("character_id")
+
+            try {
+                if (characterId.isNotEmpty() && userUid.isNotEmpty()) {
+                    val fetchedChar = getCharacterById(db = db, characterId = characterId, userUid = userUid)
+                    character = fetchedChar
+
+
+                    if (fetchedChar != null && fetchedChar.image.isNotEmpty()) {
+                        val bitmap = getImageFromUrl(fetchedChar.image)
+                        bitmapImg = bitmap
+                    } else {
+                        bitmapImg = null
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("LoadData", "Errore caricamento dati: ${e.message}")
+            } finally {
+                isLoading = false
+            }
         }
-
-
+    }
+    LaunchedEffect(Unit) {
+        loadAllData()
 
     }
     var visibilityMod by remember { mutableStateOf(false) }
@@ -112,61 +149,138 @@ fun StormbringerCharacterEditActivity() {
                 if (currentChar == null) {
                     Text(stringResource(R.string.no_heroes_selected), color = white_70)
                 } else {
+                    if(isLoading){
+                        CircularProgressIndicator(color = stormbringer_primary)
+                    }else{
+                        CustomProfileImageCircle(
+                            data = bitmapImg,
+                            borderColor = stormbringer_primary,
+                            onShow = { showSourceDialog = true },
+                        )
+                        Text(
+                            text = currentChar.name,
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = stormbringer_primary,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text(
+                            text = "class: ${currentChar.characterClass}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = white_70,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
 
-                    Text(
-                        text = currentChar.name,
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = stormbringer_primary,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                    Text(
-                        text = "class: ${currentChar.characterClass}",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = white_70,
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
+                        ExperienceBar(currentChar.xp, currentChar.level)
 
-                    ExperienceBar(currentChar.xp, currentChar.level)
-
-                    Row(
-                        modifier = Modifier
-                            .padding(top = 16.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-                        ControlButton(
-                            currentValue = currentChar.hp, maxValue = 100, onChange = { value ->
+                        BiographyText(
+                            bio = currentChar.bio,
+                            isEditable = visibilityMod,
+                            onBioChange = { newBio ->
                                 scope.launch {
-                                    character = currentChar.copy(hp = value)
+                                    character = currentChar.copy(bio = newBio)
                                     changeCharInfo(
                                         db = db,
-                                        userUid = FirebaseAuth.getInstance().currentUser!!.uid,
+                                        userUid = userUid,
                                         characterId = currentChar.id,
-                                        field = "hp",
-                                        value = value
+                                        field = "bio",
+                                        value = newBio
                                     )
 
                                 }
-                            }, visibility = visibilityMod
+                            }
                         )
-                        ControlButton(
-                            currentValue = currentChar.mp, maxValue = 100, onChange = { value ->
+
+
+
+
+                        Row(
+                            modifier = Modifier
+                                .padding(top = 16.dp)
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            ControlButton(
+                                text = "HP",
+                                currentValue = currentChar.hp, maxValue = 100, onChange = { value ->
+                                    scope.launch {
+                                        character = currentChar.copy(hp = value)
+                                        changeCharInfo(
+                                            db = db,
+                                            userUid = userUid,
+                                            characterId = currentChar.id,
+                                            field = "hp",
+                                            value = value
+                                        )
+
+                                    }
+                                }, visibility = visibilityMod
+                            )
+                            ControlButton(
+                                text = "MP",
+                                currentValue = currentChar.mp, maxValue = 100, onChange = { value ->
+                                    scope.launch {
+                                        character = currentChar.copy(mp = value)
+                                        changeCharInfo(
+                                            db = db,
+                                            userUid = userUid,
+                                            characterId = currentChar.id,
+                                            field = "mp",
+                                            value = value
+                                        )
+
+                                    }
+                                }, visibility = visibilityMod
+                            )
+                        }
+
+
+                        val galleryLauncher = rememberLauncherForActivityResult(
+                            contract = ActivityResultContracts.GetContent()
+                        ) { uri: Uri? ->
+                            uri?.let {
+                                // Handle the selected image URI
+
                                 scope.launch {
-                                    character = currentChar.copy(mp = value)
-                                    changeCharInfo(
-                                        db = db,
-                                        userUid = FirebaseAuth.getInstance().currentUser!!.uid,
-                                        characterId = currentChar.id,
-                                        field = "mp",
-                                        value = value
+                                    isLoading = true
+                                    val success = uploadCharacterImage(
+                                        storage = FirebaseStorage.getInstance(), db = db, userUid = userUid,
+                                        characterId = currentChar.id, imageUri = uri
                                     )
 
+                                    if (success) {
+                                        loadAllData()
+                                    } else {
+                                        isLoading = false
+                                        Toast.makeText(context, "Errore caricamento", Toast.LENGTH_SHORT).show()
+                                    }
                                 }
-                            }, visibility = visibilityMod
-                        )
+
+                            }
+                        }
+
+
+                        if (showSourceDialog) {
+                            ImageSourceOptionDialog(
+                                onDismiss = { showSourceDialog = false },
+                                onGalleryClick = {
+                                    showSourceDialog = false
+                                    galleryLauncher.launch("image/*")
+                                },
+                                onGenerateClick = {
+                                    showSourceDialog = false
+                                    scope.launch {
+                                        generateCharacterImage(db = db, userUid = userUid, character = currentChar)
+                                    }
+                                }
+                            )
+                        }
                     }
+
+
+
+
                 }
             }
         })

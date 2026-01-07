@@ -46,4 +46,6 @@
     <string name="whatsapp_not_installed">Sorry Whatsapp is not Installed</string>
     <string name="party_members_list">Members:</string>
     <string name="no_party_members">No Members in this party</string>
+    <string name="bio_placeholder">No biography for the character</string>
+    <string name="bio_title">Biography</string>
 </resources>

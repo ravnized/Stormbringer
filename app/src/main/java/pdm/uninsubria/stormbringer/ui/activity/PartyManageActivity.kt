@@ -10,7 +10,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -19,24 +22,35 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.launch
 import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.Character
 import pdm.uninsubria.stormbringer.tools.Party
 import pdm.uninsubria.stormbringer.tools.UserPreferences
 import pdm.uninsubria.stormbringer.tools.getCharacterById
 import pdm.uninsubria.stormbringer.tools.loadPartyInfo
+import pdm.uninsubria.stormbringer.tools.removeMemberFromParty
 import pdm.uninsubria.stormbringer.tools.uploadCharacterImage
+import pdm.uninsubria.stormbringer.ui.fragments.CharacterEditFragment
+import pdm.uninsubria.stormbringer.ui.fragments.CharacterManageFragment
+import pdm.uninsubria.stormbringer.ui.fragments.PartyManageFragment
+import pdm.uninsubria.stormbringer.ui.fragments.PartyManagerFragment
 import pdm.uninsubria.stormbringer.ui.theme.ButtonActionPrimary
+import pdm.uninsubria.stormbringer.ui.theme.ButtonInfoCharacter
 import pdm.uninsubria.stormbringer.ui.theme.CustomBottomSheet
 import pdm.uninsubria.stormbringer.ui.theme.ImageSourceOptionDialog
+import pdm.uninsubria.stormbringer.ui.theme.NavigationBarSection
+import pdm.uninsubria.stormbringer.ui.theme.stormbringer_background_dark
 import pdm.uninsubria.stormbringer.ui.theme.stormbringer_primary
 
 @Composable
@@ -48,30 +62,61 @@ fun PartyManageActivity() {
     var partyInfo by remember { mutableStateOf(Party()) }
     var showBottomSheet by remember { mutableStateOf(false) }
     var list_members by remember { mutableStateOf(listOf<Character>()) }
+    val activity = context as? androidx.fragment.app.FragmentActivity
+    var showEdit by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    fun loadData(){
+        scope.launch{
+            list_members = emptyList()
+            partyId = UserPreferences(context).getPreferencesString("current_party_id")
+            Log.i("PartyManageActivity", "Loaded Party ID: $partyId")
+            partyInfo = loadPartyInfo(db = db, partyId = partyId) ?: Party()
+            Log.i("PartyManageActivity", "Loaded Party Info: $partyInfo")
+            partyInfo.members.forEach { memberId ->
+                list_members += getCharacterById(db = db, characterId = memberId) ?: Character()
+                Log.i("PartyManageActivity", "Member ID: $memberId")
+            }
+            contentLoaded = true
+        }
+    }
 
     LaunchedEffect(Unit) {
-        partyId = UserPreferences(context).getPreferencesString("current_party_id")
-        Log.i("PartyManageActivity", "Loaded Party ID: $partyId")
-        partyInfo = loadPartyInfo(db = db, partyId = partyId) ?: Party()
-        Log.i("PartyManageActivity", "Loaded Party Info: $partyInfo")
-        partyInfo.members.forEach { memberId ->
-            list_members += getCharacterById(db = db, characterId = memberId) ?: Character()
-            Log.i("PartyManageActivity", "Member ID: $memberId")
-        }
-        contentLoaded = true
+        loadData()
     }
     val message = "${stringResource(R.string.whatsapp_text)}: *${partyInfo.id}*"
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = androidx.compose.material3.MaterialTheme.colorScheme.background
-    ) {
+    NavigationBarSection(headLine = stringResource(R.string.party_manager), floatingActionButton = {
+
+            FloatingActionButton(
+                onClick = {
+                    showEdit = !showEdit
+
+                },
+                containerColor = stormbringer_primary,
+                contentColor = stormbringer_background_dark,
+                shape = CircleShape
+            ) {
+                if(showEdit){
+                    Icon(
+                        painter = painterResource(R.drawable.close_24px),
+                        contentDescription = "Close"
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(R.drawable.edit_24px),
+                        contentDescription = "edit"
+                    )
+                }
+            }
+
+    }, currentTab = 1, content = { innerPadding ->
+
         Column(
             modifier = Modifier
+                .padding(innerPadding)
                 .fillMaxSize()
-                .padding(16.dp)
-                .imePadding(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
 
@@ -84,7 +129,11 @@ fun PartyManageActivity() {
                     modifier = Modifier.padding(8.dp),
                     style = MaterialTheme.typography.headlineMedium
                 )
-                Text("Code: ${partyInfo.id}", modifier = Modifier.padding(8.dp), style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    "Code: ${partyInfo.id}",
+                    modifier = Modifier.padding(8.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
                 ButtonActionPrimary(
                     id = R.string.send_code_to_whatsapp, conditionEnable = true, onClick = {
 
@@ -105,38 +154,58 @@ fun PartyManageActivity() {
                         }
                     })
 
-                if(list_members.isEmpty()){
+                if (list_members.isEmpty()) {
                     Text(
                         text = stringResource(R.string.no_party_members),
                         modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
                         style = MaterialTheme.typography.bodyMedium
                     )
-                }else{
+                } else {
                     Text(
                         text = stringResource(R.string.party_members_list),
                         modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
                         style = MaterialTheme.typography.bodyMedium,
                     )
 
-                    list_members.forEach {
-                            member ->
-                        Text(
-                            text = "- ${member.name} (Lv.${member.level} ${member.characterClass})",
-                            modifier = Modifier.padding(4.dp)
-                        )
+                    list_members.forEach { member ->
+
+                        ButtonInfoCharacter(
+                            character = member, isSelected = false, onClick = {
+
+                                scope.launch {
+                                    val userPrefs = UserPreferences(context)
+                                    userPrefs.savePreferencesString(
+                                        key = "character_id", value = member.id
+                                    )
+                                    Log.i("Selection", "Salvato ID: ${member.id}")
+                                    //navigate to CharacterManageActivity utilizzando il fragment
+                                    activity?.supportFragmentManager?.beginTransaction()
+                                        ?.replace(
+                                            R.id.fragment_container,
+                                            CharacterEditFragment()
+                                        )
+                                        ?.addToBackStack(null)
+                                        ?.commit()
+                                }
+                            }, showEdit = showEdit, onEdit = {
+                                scope.launch {
+                                    removeMemberFromParty(db = db, partyId = partyInfo.id, memberId = member.id)
+                                    loadData()
+                                }
+
+                            })
                     }
                 }
-
 
 
             }
 
 
-
+        }
 
 
         }
-    }
+    )
     CustomBottomSheet(isVisible = showBottomSheet, onDismiss = {
         showBottomSheet = false
     }, content = {

@@ -28,7 +28,7 @@
     <string name="no_characters_message">No character found</string>
     <string name="charcater_edit_title">Character</string>
     <string name="party_title">Party</string>
-    <string name="party_code_label">Party Code\n</string>
+    <string name="party_code_label">Party Code</string>
     <string name="party_code_hint">aajhdwlawjdladj</string>
     <string name="join_party_title">You\'re not part of any party</string>
     <string name="join_party_button">Join the party\n</string>
@@ -54,4 +54,7 @@
     <string name="upload_from_gallery">Upload from gallery</string>
     <string name="upload_from_gallery_subtitle">Select your custom image</string>
     <string name="cancel">Cancel</string>
+    <string name="party_manager">Manage Party</string>
+    <string name="multiple_parties">Parties</string>
+    <string name="add_party_button">Create a party</string>
 </resources>

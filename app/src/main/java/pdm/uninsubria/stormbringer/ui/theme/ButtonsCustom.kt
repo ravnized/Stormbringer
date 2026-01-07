@@ -45,17 +45,20 @@ import coil.request.ImageRequest
 import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.Character
 import pdm.uninsubria.stormbringer.tools.Party
+import pdm.uninsubria.stormbringer.tools.UserPreferences
 
 
 @Composable
 fun ButtonInfoCharacter(
     onClick: () -> Unit = {},
     character: Character = Character(name = "Gandalf", characterClass = "Wizard"), // Esempio dati
-    isSelected: Boolean = false
+    isSelected: Boolean = false,
+    showEdit: Boolean = false,
+    onEdit : () -> Unit = {}
 ) {
 
     val borderStroke = if (isSelected) {
-        BorderStroke(2.dp, glow_subtle)
+        BorderStroke(2.dp, glow_active)
     } else {
         BorderStroke(1.dp, white_20)
     }
@@ -86,7 +89,7 @@ fun ButtonInfoCharacter(
                     .size(64.dp)
                     .border(
                         width = if (isSelected) 2.dp else 1.dp,
-                        color = if (isSelected) glow_subtle else white_20,
+                        color = if (isSelected) glow_active else white_20,
                         shape = CircleShape
                     )
                     .padding(2.dp)
@@ -96,13 +99,13 @@ fun ButtonInfoCharacter(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(character.image)
                         .crossfade(true)
+                        .networkCachePolicy(CachePolicy.ENABLED)
                         .diskCachePolicy(CachePolicy.ENABLED)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
                         .build(),
-                    contentDescription = "Avatar di ${character.name}",
+                    contentDescription = "Avatar of ${character.name}",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
-                    placeholder = painterResource(R.drawable.account_circle_24px),
-                    error = painterResource(R.drawable.close_24px)
                 )
             }
 
@@ -115,7 +118,7 @@ fun ButtonInfoCharacter(
             ) {
                 Text(
                     text = character.name,
-                    color = if (isSelected) glow_subtle else white_70,
+                    color = if (isSelected) glow_active else white_70,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1
                 )
@@ -128,13 +131,39 @@ fun ButtonInfoCharacter(
                     fontSize = 12.sp
                 )
             }
+            if(showEdit){
+                // Edit icon on the right and on click edit character
+                Button(
+                    onClick = {
+                        onEdit()
+                    },
+                    colors = ButtonColors(
+                        containerColor = stormbringer_surface_dark,
+                        contentColor = white_50,
+                        disabledContentColor = stormbringer_background_dark,
+                        disabledContainerColor = stormbringer_surface_dark
+                    ),
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier
+                        .padding(0.dp)
+                        .size(24.dp),
+                    enabled = true
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.remove_24px),
+                        contentDescription = "Remove Character from Party",
+                        tint = white_50,
+                        modifier = Modifier.size(24.dp)
+                    )
 
+                }
 
-            if (isSelected) {
+            }else if (isSelected) {
                 Icon(
                     painter = painterResource(R.drawable.check_circle_24px),
                     contentDescription = "Selected",
-                    tint = glow_subtle,
+                    tint = glow_active,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -147,53 +176,93 @@ fun ButtonInfoCharacter(
 fun ButtonInfoParty(
     onClick: () -> Unit = {},
     party: Party = Party(name = "Fellowship"),
+    isSelected: Boolean = false,
+    editEnable : Boolean = false,
+    onClickDelete: () -> Unit = {}
 ) {
 
-    Box(
-        contentAlignment = Alignment.Center,
-        propagateMinConstraints = true,
+    val borderStroke = if (isSelected) {
+        BorderStroke(2.dp, glow_active)
+    } else {
+        BorderStroke(1.dp, white_20)
+    }
+
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = stormbringer_surface_dark,
+        border = borderStroke,
         modifier = Modifier
-            .background(
-                color = stormbringer_surface_dark, shape = RoundedCornerShape(16.dp)
-            )
-            .height(100.dp),
-        content = {
-            Button(
-                enabled = true, shape = RoundedCornerShape(16.dp), colors = ButtonColors(
-                    containerColor = stormbringer_surface_dark,
-                    contentColor = stormbringer_background_dark,
-                    disabledContainerColor = white_20,
-                    disabledContentColor = white_20
-                ),
-
-                onClick = {
-                    onClick()
-                }, modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(), content = {
-                    //row with a image of the character on the left and info on the right
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.Start,
-                    ) {
-                        Text(
-                            text = party.name,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = white_70
-                        )
-                        Text(
-                            text = "${party.members.size} members",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = white_50,
-                            maxLines = 1,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
+            .fillMaxWidth()
+            .height(90.dp)
+            .padding(vertical = 4.dp),
+        shadowElevation = if (isSelected) 8.dp else 2.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
 
 
-                })
-        })
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = party.name,
+                    color = if (isSelected) glow_active else white_70,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1
+                )
+
+                Text(
+                    text = "${party.members.size} members",
+                    color = white_50,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontSize = 12.sp
+                )
+            }
+            if(editEnable){
+                // Delete icon on the right and on click delete party
+                Button(
+                    onClick = {
+                        onClickDelete()
+                    },
+                    colors = ButtonColors(
+                        containerColor = stormbringer_surface_dark,
+                        contentColor = white_50,
+                        disabledContentColor = stormbringer_background_dark,
+                        disabledContainerColor = stormbringer_surface_dark
+                    ),
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier
+                        .padding(0.dp)
+                        .size(24.dp),
+                    enabled = true
+                ) {
+
+
+                    Icon(
+                        painter = painterResource(R.drawable.delete_24px),
+                        contentDescription = "Delete Party",
+                        tint = white_50,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }else if (isSelected) {
+                Icon(
+                    painter = painterResource(R.drawable.check_circle_24px),
+                    contentDescription = "Selected",
+                    tint = glow_active,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    }
 }
 
 @Composable

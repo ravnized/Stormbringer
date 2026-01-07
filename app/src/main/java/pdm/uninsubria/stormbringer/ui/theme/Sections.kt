@@ -52,6 +52,7 @@ import pdm.uninsubria.stormbringer.ui.activity.ProfileDialog
 import pdm.uninsubria.stormbringer.ui.fragments.CharacterEditFragment
 import pdm.uninsubria.stormbringer.ui.fragments.CharacterManageFragment
 import pdm.uninsubria.stormbringer.ui.fragments.InitialFragment
+import pdm.uninsubria.stormbringer.ui.fragments.PartyManageFragment
 import pdm.uninsubria.stormbringer.ui.fragments.PartyManagerFragment
 
 @Preview
@@ -246,6 +247,29 @@ fun NavigationBarSection(
                             Icon(
                                 painter = painterResource(R.drawable.sailing_24px),
                                 contentDescription = "Party Manager"
+                            )
+                        },
+                        label = { Text(stringResource(R.string.multiple_parties)) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = stormbringer_primary,
+                            indicatorColor = stormbringer_primary.copy(alpha = 0.2f)
+                        )
+                    )
+
+                    NavigationBarItem(
+                        selected = currentTab == 1,
+                        onClick = {
+                            if (currentTab != 1) {
+                                activity?.supportFragmentManager?.beginTransaction()
+                                    ?.setReorderingAllowed(true)
+                                    ?.replace(R.id.fragment_container, PartyManageFragment())
+                                    ?.addToBackStack(null)?.commit()
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.wand_shine_24px),
+                                contentDescription = "Party Manage"
                             )
                         },
                         label = { Text(stringResource(R.string.party_title)) },

@@ -19,6 +19,18 @@ class Party(
 
 }
 
+suspend fun deleteParty(db: FirebaseFirestore, partyId: String): Boolean {
+    return try {
+        db.collection("parties").document(partyId).delete().await()
+        Log.i("PartyManager", "Party con ID $partyId eliminato con successo")
+        true
+    } catch (e: Exception) {
+        Log.e("PartyManager", "Errore eliminazione party: ${e.message}")
+        false
+    }
+}
+
+
 suspend fun createParty(db: FirebaseFirestore,userUid: String, partyName: String): String? {
     return try {
         val newPartyRef = db.collection("parties").document()
@@ -131,5 +143,35 @@ suspend fun loadPartyInfoByCharacter(db: FirebaseFirestore, characterId: String)
     } catch (e: Exception) {
         Log.e("PartyManager", "Errore caricamento info party per personaggio: ${e.message}")
         null
+    }
+}
+
+suspend fun removeMemberFromParty(db: FirebaseFirestore, partyId: String, memberId: String): Boolean {
+    return try {
+        val partyRef = db.collection("parties").document(partyId)
+        val partySnapshot = partyRef.get().await()
+
+        if (!partySnapshot.exists()) {
+            Log.e("PartyManager", "Party con ID $partyId non trovato")
+            return false
+        }
+
+        val party = partySnapshot.toObject(Party::class.java) ?: return false
+
+        if (!party.members.contains(memberId)) {
+            Log.e("PartyManager", "L'utente non è membro del party")
+            return false
+        }
+
+        val updatedMembers = party.members.toMutableList().apply { remove(memberId) }
+
+        partyRef.update("members", updatedMembers).await()
+
+        Log.i("PartyManager", "Membro rimosso dal party $partyId")
+        true
+
+    } catch (e: Exception) {
+        Log.e("PartyManager", "Errore rimozione membro dal party: ${e.message}")
+        false
     }
 }

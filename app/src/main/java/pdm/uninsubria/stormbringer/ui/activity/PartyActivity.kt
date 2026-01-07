@@ -45,18 +45,21 @@ import androidx.fragment.app.FragmentActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.selects.select
 import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.Character
 import pdm.uninsubria.stormbringer.tools.Party
 import pdm.uninsubria.stormbringer.tools.UserPreferences
 import pdm.uninsubria.stormbringer.tools.addNewMemberToParty
 import pdm.uninsubria.stormbringer.tools.createParty
+import pdm.uninsubria.stormbringer.tools.deleteParty
 import pdm.uninsubria.stormbringer.tools.getCharacterById
 import pdm.uninsubria.stormbringer.tools.loadMultiplePartyInfoByGM
 import pdm.uninsubria.stormbringer.tools.loadPartyInfo
 import pdm.uninsubria.stormbringer.tools.loadPartyInfoByCharacter
 import pdm.uninsubria.stormbringer.ui.fragments.PartyManageFragment
 import pdm.uninsubria.stormbringer.ui.theme.AlertDialogRegister
+import pdm.uninsubria.stormbringer.ui.theme.ButtonActionPrimary
 import pdm.uninsubria.stormbringer.ui.theme.ButtonInfoCharacter
 import pdm.uninsubria.stormbringer.ui.theme.ButtonInfoParty
 import pdm.uninsubria.stormbringer.ui.theme.CustomBottomSheet
@@ -82,37 +85,48 @@ fun StormbringerPartyActivity() {
     var showSheet by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
     var charactersInParty by remember { mutableStateOf<List<Character>>(emptyList()) }
-    LaunchedEffect(Unit) {
-        val characterId = userPreferences.getPreferencesString("character_id")
-        val savedMode = userPreferences.getPreferencesString("player_mode")
-        if (characterId.isNotEmpty() && savedMode != "GM") {
-            val loadedParty = loadPartyInfoByCharacter(db = db, characterId = characterId)
-            if (loadedParty != null) {
-                party = loadedParty
-            }
-            Log.i("PartyActivity", "Loaded party for character $characterId: ${party.id}")
+    var selectedPartyId by remember { mutableStateOf("") }
+    var showEdit by remember { mutableStateOf(false) }
 
-            if (savedMode.isNotEmpty()) {
-                mode = savedMode
+    fun loadData(){
+        scope.launch {
+            val characterId = userPreferences.getPreferencesString("character_id")
+            val savedMode = userPreferences.getPreferencesString("player_mode")
+            if (characterId.isNotEmpty() && savedMode != "GM") {
+                val loadedParty = loadPartyInfoByCharacter(db = db, characterId = characterId)
+                if (loadedParty != null) {
+                    party = loadedParty
+                }
+                Log.i("PartyActivity", "Loaded party for character $characterId: ${party.id}")
+
+                if (savedMode.isNotEmpty()) {
+                    mode = savedMode
+                }
+
+                charactersInParty = party.members.mapNotNull { memberId ->
+                    getCharacterById(db = db, characterId = memberId)
+                }
+
+                showTextSelect = false
+            } else if (savedMode == "GM") {
+                val userUid = auth.currentUser?.uid ?: ""
+                parties = loadMultiplePartyInfoByGM(db = db, userUid = userUid)
+                Log.i("PartyActivity", "Loaded parties for GM: ${parties.size}")
+                mode = "GM"
+                selectedPartyId = userPreferences.getPreferencesString("current_party_id")
+                showTextSelect = false
+            } else {
+                Log.e("PartyActivity", "No character ID or user is not GM")
+                showTextSelect = true
             }
 
-            charactersInParty = party.members.mapNotNull { memberId ->
-                getCharacterById(db = db, characterId = memberId)
-            }
-
-            showTextSelect = false
-        } else if (savedMode == "GM") {
-            val userUid = auth.currentUser?.uid ?: ""
-            parties = loadMultiplePartyInfoByGM(db = db, userUid = userUid)
-            Log.i("PartyActivity", "Loaded parties for GM: ${parties.size}")
-            mode = "GM"
-            showTextSelect = false
-        } else {
-            Log.e("PartyActivity", "No character ID or user is not GM")
-            showTextSelect = true
+            isLoading = false
         }
 
-        isLoading = false
+    }
+
+    LaunchedEffect(Unit) {
+        loadData()
     }
 
 
@@ -120,16 +134,25 @@ fun StormbringerPartyActivity() {
         if(mode=="GM") {
             FloatingActionButton(
                 onClick = {
-                    //add new party
-                    showSheet = true
+                    //edit party
+                    showEdit = !showEdit
                 },
                 containerColor = stormbringer_primary,
                 contentColor = stormbringer_background_dark,
                 shape = CircleShape
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.add_24px), contentDescription = "add"
-                )
+
+                if(showEdit){
+                    Icon(
+                        painter = painterResource(R.drawable.check_24px), contentDescription = "confirm"
+                    )
+                }else{
+                    Icon(
+                        painter = painterResource(R.drawable.edit_24px), contentDescription = "edit"
+                    )
+                }
+
+
             }
         }
     }, currentTab = if (mode == "GM") 0 else 2, content = { innerPadding ->
@@ -146,7 +169,15 @@ fun StormbringerPartyActivity() {
                 CircularProgressIndicator(color = stormbringer_primary)
             } else {
                 if (mode == "GM") {
-                    GameMasterScreen(parties = parties)
+
+                    GameMasterScreen(parties = parties, editEnable = showEdit, loadData = {
+                        loadData()
+                    })
+                    ButtonActionPrimary(
+                        onClick = {showSheet = true},
+                        id = R.string.add_party_button,
+                        conditionEnable = true
+                    )
                 } else {
                     if (showTextSelect) {
                         Text(
@@ -194,41 +225,50 @@ fun StormbringerPartyActivity() {
 }
 
 @Composable
-fun GameMasterScreen(parties: List<Party>) {
+fun GameMasterScreen(parties: List<Party>, editEnable: Boolean = false, loadData: () -> Unit) {
     val context = LocalContext.current
-    val activity = context as? FragmentActivity
     val scope = rememberCoroutineScope()
     Log.i("PartyActivity", "Rendering GameMasterScreen with ${parties.size} parties")
+    var currentPartyId by remember { mutableStateOf("") }
+    LaunchedEffect(Unit) {
+        currentPartyId  = UserPreferences(context).getPreferencesString("current_party_id")
+    }
+
+
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier,
 
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(bottom = 16.dp, top = 16.dp)
     ) {
         items(parties) { party ->
+            val isSelected = (party.id == currentPartyId)
             ButtonInfoParty(
                 party = party, onClick = {
-                    //open party details
                     scope.launch {
-                        UserPreferences(context).savePreferencesString(
-                            key = "current_party_id",
-                            value = party.id
-                        )
-                        //support going back to previous fragment
-
-                        activity?.supportFragmentManager?.beginTransaction()
-                            ?.replace(
-                                R.id.fragment_container,
-                                PartyManageFragment()
+                            UserPreferences(context).savePreferencesString(
+                                key = "current_party_id",
+                                value = if(isSelected) "" else party.id
                             )
-                            ?.addToBackStack(null)
-                            ?.commit()
+                        currentPartyId = if(isSelected) "" else party.id
+
                     }
 
+                }, isSelected = isSelected, editEnable = editEnable, onClickDelete = {
+                    scope.launch {
+                        deleteParty(
+                            db = FirebaseFirestore.getInstance(),
+                            partyId = party.id
+                        )
+                        loadData()
+                    }
                 })
         }
     }
+
+
+
 
 
 }
@@ -376,9 +416,16 @@ fun PlayerScreen(partyId: String = "" , partyInfo: Party = Party(), characters: 
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = stringResource(R.string.party_info_title),
+                text = partyInfo.name,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(bottom = 16.dp),
+                textAlign = TextAlign.Center
+            )
+
+            Text(
+                text = "Members: ${partyInfo.members.size}",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(bottom = 8.dp),
                 textAlign = TextAlign.Center
             )
 

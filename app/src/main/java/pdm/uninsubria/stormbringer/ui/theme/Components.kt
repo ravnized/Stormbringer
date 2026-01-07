@@ -308,14 +308,13 @@ fun CustomProfileImageCircle(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(data)
                     .crossfade(true)
+                    .networkCachePolicy(CachePolicy.ENABLED)
                     .diskCachePolicy(CachePolicy.ENABLED)
+                    .memoryCachePolicy(CachePolicy.ENABLED)
                     .build(),
                 contentDescription = "Avatar",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-
-                placeholder = painterResource(R.drawable.account_circle_24px),
-                error = painterResource(R.drawable.close_24px)
             )
 
 

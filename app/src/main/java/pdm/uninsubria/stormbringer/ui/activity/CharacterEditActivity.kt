@@ -1,6 +1,5 @@
 package pdm.uninsubria.stormbringer.ui.activity
 
-import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -30,12 +29,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.createBitmap
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.launch
 import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.Character
@@ -43,7 +39,6 @@ import pdm.uninsubria.stormbringer.tools.UserPreferences
 import pdm.uninsubria.stormbringer.tools.changeCharInfo
 import pdm.uninsubria.stormbringer.tools.generateCharacterImage
 import pdm.uninsubria.stormbringer.tools.getCharacterById
-import pdm.uninsubria.stormbringer.tools.getImageFromUrl
 import pdm.uninsubria.stormbringer.tools.uploadCharacterImage
 import pdm.uninsubria.stormbringer.ui.theme.BiographyText
 import pdm.uninsubria.stormbringer.ui.theme.ControlButton
@@ -64,9 +59,7 @@ fun StormbringerCharacterEditActivity() {
     val db = remember { FirebaseFirestore.getInstance() }
     val userPreferences = UserPreferences(context)
     var showSourceDialog by remember { mutableStateOf(false) }
-    var showAiInputForm by remember { mutableStateOf(false) }
     val userUid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-    var doneUploading by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
 
     fun loadAllData() {
@@ -77,7 +70,8 @@ fun StormbringerCharacterEditActivity() {
 
             try {
                 if (characterId.isNotEmpty() && userUid.isNotEmpty()) {
-                    val fetchedChar = getCharacterById(db = db, characterId = characterId, userUid = userUid)
+                    val fetchedChar =
+                        getCharacterById(db = db, characterId = characterId, userUid = userUid)
                     character = fetchedChar
 
                 }
@@ -137,13 +131,14 @@ fun StormbringerCharacterEditActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
-                val currentChar = character
-                if (currentChar == null) {
-                    Text(stringResource(R.string.no_heroes_selected), color = white_70)
+                if (isLoading) {
+                    CircularProgressIndicator(color = stormbringer_primary)
                 } else {
-                    if(isLoading){
-                        CircularProgressIndicator(color = stormbringer_primary)
-                    }else{
+                    val currentChar = character
+                    if (currentChar == null) {
+                        Text(stringResource(R.string.no_heroes_selected), color = white_70)
+                    } else {
+
                         CustomProfileImageCircle(
                             data = currentChar.image,
                             borderColor = stormbringer_primary,
@@ -180,8 +175,7 @@ fun StormbringerCharacterEditActivity() {
                                     )
 
                                 }
-                            }
-                        )
+                            })
 
 
 
@@ -196,7 +190,9 @@ fun StormbringerCharacterEditActivity() {
 
                             ControlButton(
                                 text = "HP",
-                                currentValue = currentChar.hp, maxValue = 100, onChange = { value ->
+                                currentValue = currentChar.hp,
+                                maxValue = 100,
+                                onChange = { value ->
                                     scope.launch {
                                         character = currentChar.copy(hp = value)
                                         changeCharInfo(
@@ -208,11 +204,14 @@ fun StormbringerCharacterEditActivity() {
                                         )
 
                                     }
-                                }, visibility = visibilityMod
+                                },
+                                visibility = visibilityMod
                             )
                             ControlButton(
                                 text = "MP",
-                                currentValue = currentChar.mp, maxValue = 100, onChange = { value ->
+                                currentValue = currentChar.mp,
+                                maxValue = 100,
+                                onChange = { value ->
                                     scope.launch {
                                         character = currentChar.copy(mp = value)
                                         changeCharInfo(
@@ -224,7 +223,8 @@ fun StormbringerCharacterEditActivity() {
                                         )
 
                                     }
-                                }, visibility = visibilityMod
+                                },
+                                visibility = visibilityMod
                             )
                         }
 
@@ -238,15 +238,22 @@ fun StormbringerCharacterEditActivity() {
                                 scope.launch {
                                     isLoading = true
                                     val success = uploadCharacterImage(
-                                        storage = FirebaseStorage.getInstance(), db = db, userUid = userUid,
-                                        characterId = currentChar.id, imageUri = uri
+                                        storage = FirebaseStorage.getInstance(),
+                                        db = db,
+                                        userUid = userUid,
+                                        characterId = currentChar.id,
+                                        imageUri = uri
                                     )
 
                                     if (success) {
                                         loadAllData()
                                     } else {
                                         isLoading = false
-                                        Toast.makeText(context, "Errore caricamento", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            context,
+                                            "Errore caricamento",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     }
                                 }
 
@@ -265,21 +272,26 @@ fun StormbringerCharacterEditActivity() {
                                     showSourceDialog = false
                                     scope.launch {
                                         isLoading = true
-                                        val success = generateCharacterImage(db = db, userUid = userUid, character = currentChar)
+                                        val success = generateCharacterImage(
+                                            db = db,
+                                            userUid = userUid,
+                                            character = currentChar
+                                        )
                                         if (success) {
                                             loadAllData()
                                         } else {
                                             isLoading = false
-                                            Toast.makeText(context, "Errore generazione immagine", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(
+                                                context,
+                                                "Errore generazione immagine",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                         }
 
                                     }
-                                }
-                            )
+                                })
                         }
                     }
-
-
 
 
                 }

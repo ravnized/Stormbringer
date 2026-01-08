@@ -319,8 +319,14 @@ fun NavigationBarSection(
 
 
     if (showProfileDialog) {
-
-         val email: String = auth.currentUser?.email ?: "Guest"
+        val currentUser = auth.currentUser
+        val email = remember(currentUser) {
+            when {
+                currentUser == null -> ""
+                currentUser.isAnonymous -> "Guest"
+                else -> currentUser.email ?: ""
+            }
+        }
         ProfileDialog(
             email = email,
             onDismiss = { showProfileDialog = false },

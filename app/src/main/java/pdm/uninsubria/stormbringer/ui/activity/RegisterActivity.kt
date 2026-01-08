@@ -4,13 +4,20 @@ package pdm.uninsubria.stormbringer.ui.activity
 import android.util.Log
 import android.util.Patterns
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.fragment.app.FragmentManager
 import kotlinx.coroutines.launch
 import pdm.uninsubria.stormbringer.R
@@ -38,6 +46,8 @@ import pdm.uninsubria.stormbringer.ui.theme.InputEmail
 import pdm.uninsubria.stormbringer.ui.theme.InputPassword
 import pdm.uninsubria.stormbringer.ui.theme.SelectorMode
 import pdm.uninsubria.stormbringer.ui.theme.ValidationError
+import pdm.uninsubria.stormbringer.ui.theme.stormbringer_primary
+import pdm.uninsubria.stormbringer.ui.theme.stormbringer_surface_dark
 
 private const val PASSWORD_VALIDATION_REGEX =
     "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$"
@@ -69,6 +79,7 @@ fun StormbringerRegister() {
         val isPasswordValid =
             remember(valuePassword.text) { isPasswordValid(valuePassword.text.toString()) }
         val activity = context as? androidx.fragment.app.FragmentActivity
+        var isLoading by remember { mutableStateOf(false) }
         Column(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -97,35 +108,69 @@ fun StormbringerRegister() {
 
 
             Spacer(modifier = Modifier.padding(16.dp))
+            val txtErrorTitle = stringResource(R.string.error_title_generic)
+            val txtErrorMsg = stringResource(R.string.register_message_failure)
 
-            ButtonActionPrimary(conditionEnable = isEmailValid && isPasswordValid, onClick = {
-                scope.launch {
-                    val success = userAction.registerUser(
-                        email = valueEmail.text.toString(), pass = valuePassword.text.toString()
-                    )
-                    if (success) {
-                        Log.i("UI", "Navigazione verso il Vuoto...")
-
-                    } else {
-                        Log.e("UI", "Registrazione fallita")
-                    }
-                    titleAlert = if (success) "Patto Sigillato" else "Rituale Fallito"
-                    messageAlert = if (success) "Benvenuto nel Vuoto." else "Riprova."
-                    showDialog = true
-                    if (success) {
-                        activity?.supportFragmentManager?.popBackStack(
-                            null, FragmentManager.POP_BACK_STACK_INCLUSIVE
+            ButtonActionPrimary(
+                conditionEnable = isEmailValid && isPasswordValid,
+                onClick = {
+                    isLoading = true
+                    scope.launch {
+                        val success = userAction.registerUser(
+                            email = valueEmail.text.toString(),
+                            pass = valuePassword.text.toString()
                         )
 
-                        activity?.supportFragmentManager?.beginTransaction()
-                            ?.setReorderingAllowed(true)?.replace(
-                                R.id.fragment_container, CharacterManageFragment()
-                            )?.commit()
+
+
+                        if (success) {
+                            isLoading = false
+                            activity?.supportFragmentManager?.popBackStack(
+                                null, FragmentManager.POP_BACK_STACK_INCLUSIVE
+                            )
+
+                            activity?.supportFragmentManager?.beginTransaction()
+                                ?.setReorderingAllowed(true)
+
+                                ?.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                                ?.replace(R.id.fragment_container, CharacterManageFragment())
+                                ?.commit()
+                        } else {
+                            isLoading = false
+                            titleAlert = txtErrorTitle
+                            messageAlert = txtErrorMsg
+                            showDialog = true
+                        }
                     }
-                }
-            }, id = R.string.register_button)
+                },
+                id = R.string.register_button
+            )
 
             SelectorMode()
+
+            if (isLoading) {
+                Dialog(onDismissRequest = { /* Disable dismiss on outside touch */ }) {
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = stormbringer_surface_dark),
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f)
+                            .fillMaxHeight(0.3f)
+                            .padding(16.dp)
+                    )
+
+                    {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(color = stormbringer_primary)
+                        }
+
+                    }
+                }
+
+            }
+
+
+
             if (showDialog) {
                 AlertDialogRegister(
                     alertTitle = titleAlert,

@@ -72,7 +72,7 @@ fun ProfileDialog(
                     )
                 }
 
-                // Icona Profilo
+
                 Icon(
                     painter = painterResource(id = R.drawable.person_24px),
                     contentDescription = "Profile",
@@ -84,7 +84,7 @@ fun ProfileDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Email Utente
+
                 Text(
                     text = "${stringResource(R.string.email_key)} :",
                     style = MaterialTheme.typography.bodySmall,

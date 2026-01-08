@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -155,11 +156,20 @@ fun StormbringerCharacterEditActivity() {
                 verticalArrangement = Arrangement.Top
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(color = stormbringer_primary)
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = stormbringer_primary)
+                    }
                 } else {
                     val currentChar = character
                     if (currentChar == null) {
-                        Text(stringResource(R.string.no_heroes_selected), color = white_70)
+                        Text(
+                            text = stringResource(R.string.no_heroes_selected),
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier
+                                .padding(bottom = 16.dp)
+                                .fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
                     } else {
 
 
@@ -195,6 +205,16 @@ fun StormbringerCharacterEditActivity() {
                                     showSourceDialog = false
                                     scope.launch {
                                         isLoading = true
+                                        if(currentChar.bio.isEmpty()){
+                                            //fail the generation if no bio is present
+                                            Toast.makeText(
+                                                context,
+                                                "Please add a biography before generating an image.",
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                            isLoading = false
+                                            return@launch
+                                        }
                                         generateCharacterImage(db, userUid, currentChar)
                                         loadAllData()
 

@@ -36,7 +36,7 @@
     <string name="charcater_edit_title">Character</string>
     <string name="party_title">Party</string>
     <string name="party_code_label">Party Code</string>
-    <string name="party_code_hint">aajhdwlawjdladj</string>
+    <string name="party_code_hint">Party code goes here</string>
     <string name="join_party_title">You\'re not part of any party</string>
     <string name="join_party_button">Join the party\n</string>
     <string name="join_party_failed_title">Error</string>
@@ -69,4 +69,10 @@
     <string name="reroll">Reroll</string>
     <string name="leave_party_button">Leave Party</string>
     <string name="create_character_button">Create Character</string>
+    <string name="register_title_success">Welcome to the void</string>
+    <string name="register_title_failure">There has been a problem</string>
+    <string name="error_title_generic">Error</string>
+    <string name="register_message_failure">Please Retry</string>
+    <string name="login_message_failure">Please Retry</string>
+    <string name="no_party_found">No party Selected</string>
 </resources>

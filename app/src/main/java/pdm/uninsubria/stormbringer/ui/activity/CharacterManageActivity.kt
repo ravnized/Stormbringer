@@ -2,8 +2,12 @@ package pdm.uninsubria.stormbringer.ui.activity
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,6 +18,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -85,7 +90,7 @@ fun StormbringerCharacterManage() {
         currentTab = 0,
         floatingActionButton = {
 
-            if (mode != "GM") {
+            if (characters.isNotEmpty()) {
                 FloatingActionButton(
                     onClick = {
                         editMode = !editMode
@@ -113,12 +118,15 @@ fun StormbringerCharacterManage() {
         },
         content = { paddingValues ->
             Column(
-                modifier = Modifier.padding(paddingValues).verticalScroll(rememberScrollState()),
+                modifier = Modifier.padding(paddingValues),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(color = stormbringer_primary)
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = stormbringer_primary)
+                    }
+
                 } else {
 
                         if (characters.isNotEmpty()) {
@@ -165,7 +173,7 @@ fun StormbringerCharacterManage() {
                                 verticalArrangement = Arrangement.Center,
                                 modifier = Modifier.padding(
                                     16.dp
-                                )
+                                ).fillMaxWidth()
                             ) {
                                 Text(
                                     text = stringResource(R.string.no_characters_message),

@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
@@ -123,8 +124,19 @@ fun PartyManageActivity() {
 
 
             if (!contentLoaded) {
-                CircularProgressIndicator(color = stormbringer_primary)
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = stormbringer_primary)
+                }
             } else {
+
+                if(partyInfo.id.isEmpty()){
+                    Text(
+                        text = stringResource(R.string.no_party_found),
+                        modifier = Modifier.padding(8.dp),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    return@Column
+                }
 
                 Text(
                     text = "Party: ${partyInfo.name}",

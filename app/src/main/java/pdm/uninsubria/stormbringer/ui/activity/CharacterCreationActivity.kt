@@ -49,7 +49,6 @@ fun StormbringerCharacterCreation() {
         remember { FirebaseAuth.getInstance() }
         val context = LocalContext.current
         val activity = context as? androidx.fragment.app.FragmentActivity
-        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
                 .padding(16.dp),

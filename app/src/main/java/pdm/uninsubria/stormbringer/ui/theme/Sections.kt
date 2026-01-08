@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -137,8 +138,7 @@ fun NavigationBarSection(
             Surface(
                 color = stormbringer_background_dark,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 25.dp)
+                    .fillMaxWidth().imePadding()
             ) {
                 Row(
                     modifier = Modifier
@@ -319,8 +319,10 @@ fun NavigationBarSection(
 
 
     if (showProfileDialog) {
+
+         val email: String = auth.currentUser?.email ?: "Guest"
         ProfileDialog(
-            email = auth.currentUser?.email ?: stringResource(R.string.guest_access_title),
+            email = email,
             onDismiss = { showProfileDialog = false },
             onLogout = {
                 showProfileDialog = false

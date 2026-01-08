@@ -2,6 +2,7 @@ package pdm.uninsubria.stormbringer.ui.activity
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -168,35 +169,39 @@ fun StormbringerPartyActivity() {
 
             }
         } else {
-            FloatingActionButton(
-                onClick = {
-                    //edit party
-                    showSides = true
-                },
-                containerColor = stormbringer_primary,
-                contentColor = stormbringer_background_dark,
-                shape = CircleShape
-            ) {
+            if(party.id.isNotEmpty()){
+                FloatingActionButton(
+                    onClick = {
+                        //edit party
+                        showSides = true
+                    },
+                    containerColor = stormbringer_primary,
+                    contentColor = stormbringer_background_dark,
+                    shape = CircleShape
+                ) {
 
-                Icon(
-                    painter = painterResource(R.drawable.casino_24px), contentDescription = "roll"
-                )
+                    Icon(
+                        painter = painterResource(R.drawable.casino_24px), contentDescription = "roll"
+                    )
 
 
+                }
             }
+
         }
     }, currentTab = if (mode == "GM") 0 else 2, content = { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize()
-                .padding(16.dp).verticalScroll(rememberScrollState()),
+                .fillMaxSize(),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            //is loading per evitate caricamenti strani
+
             if (isLoading) {
-                CircularProgressIndicator(color = stormbringer_primary)
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = stormbringer_primary)
+                }
             } else {
                 if (mode == "GM") {
 

@@ -35,6 +35,7 @@ import pdm.uninsubria.stormbringer.ui.theme.HeaderLogo
 import pdm.uninsubria.stormbringer.ui.theme.InputEmail
 import pdm.uninsubria.stormbringer.ui.theme.InputPassword
 import pdm.uninsubria.stormbringer.ui.theme.SelectorMode
+import pdm.uninsubria.stormbringer.ui.theme.ValidationError
 
 private const val PASSWORD_VALIDATION_REGEX =
     "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$"
@@ -78,25 +79,18 @@ fun StormbringerRegister() {
 
             InputEmail(
                 valueEmail, onFocusChanged = { isFocused -> if (!isFocused) isEmailTouched = true })
-            if (isEmailTouched && !isEmailValid && valueEmail.text.isNotEmpty()) {
-                Text(
-                    text = stringResource(R.string.invalid_email_format),
-                    color = Color.Red,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                )
-            }
+            ValidationError(
+                text = stringResource(R.string.invalid_email_format),
+                isVisible = isEmailTouched && !isEmailValid && valueEmail.text.isNotEmpty()
+            )
+
             InputPassword(
                 state = valuePassword,
                 onFocusChanged = { isFocused -> if (!isFocused) isPasswordTouched = true })
-            if (isPasswordTouched && !isPasswordValid && valuePassword.text.isNotEmpty()) {
-                Text(
-                    text = stringResource(R.string.invalid_password_format),
-                    color = Color.Red,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                )
-            }
+            ValidationError(
+                text = stringResource(R.string.invalid_password_format),
+                isVisible = isPasswordTouched && !isPasswordValid && valuePassword.text.isNotEmpty()
+            )
 
 
 

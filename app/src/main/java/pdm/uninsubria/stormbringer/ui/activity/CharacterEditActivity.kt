@@ -72,7 +72,7 @@ fun StormbringerCharacterEditActivity() {
 
     fun loadAllData() {
         scope.launch {
-            isLoading = true // 1. Attiva il loader
+            isLoading = true
 
             val characterId = userPreferences.getPreferencesString("character_id")
 
@@ -210,8 +210,6 @@ fun StormbringerCharacterEditActivity() {
                                 .padding(bottom = 80.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-
-                            // 1. HEADER (Immagine e Info Base)
                             Box(modifier = Modifier.padding(top = 24.dp)) {
                                 CustomProfileImageCircle(
                                     data = currentChar.image,

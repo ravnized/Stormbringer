@@ -150,7 +150,6 @@ fun StormbringerCharacterEditActivity() {
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
-                    .padding(16.dp)
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top

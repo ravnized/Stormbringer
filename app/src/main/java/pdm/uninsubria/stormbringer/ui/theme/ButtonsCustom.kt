@@ -195,7 +195,7 @@ fun ButtonInfoParty(
         modifier = Modifier
             .fillMaxWidth()
             .height(90.dp)
-            .padding(vertical = 4.dp),
+            .padding(vertical = 4.dp, horizontal = 8.dp),
         shadowElevation = if (isSelected) 8.dp else 2.dp
     ) {
         Row(
@@ -318,6 +318,7 @@ fun ButtonActionPrimary(
                             text = stringResource(id),
                             style = MaterialTheme.typography.headlineSmall,
                             color = stormbringer_surface_dark,
+
                             modifier = Modifier.padding(16.dp)
                         )
                     }

@@ -169,8 +169,38 @@ fun SquareActionButton(
 }
 
 @Composable
-fun ExperienceBar(currentXp: Int = 100, level: Int = 0) {
-    val maxXp = level * 1000f
+fun ExperienceBar(currentXp: () -> Int, level: () -> Int) {
+    /*
+    xp table
+    when {
+            xp < 100 -> 1
+            xp < 300 -> 2
+            xp < 600 -> 3
+            xp < 1000 -> 4
+            xp < 1500 -> 5
+            xp < 2100 -> 6
+            xp < 2800 -> 7
+            xp < 3600 -> 8
+            xp < 4500 -> 9
+            else -> 10
+        }
+     */
+
+    val currentXp = currentXp()
+    val level = level()
+
+    val maxXp = when (level) {
+        1 -> 100f
+        2 -> 300f
+        3 -> 600f
+        4 -> 1000f
+        5 -> 1500f
+        6 -> 2100f
+        7 -> 2800f
+        8 -> 3600f
+        9 -> 4500f
+        else -> 1f
+    }
 
     val progress = (currentXp / maxXp).coerceIn(0f, 1f)
 

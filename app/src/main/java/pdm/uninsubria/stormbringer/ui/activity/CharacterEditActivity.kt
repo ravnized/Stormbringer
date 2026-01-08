@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -57,6 +58,8 @@ import pdm.uninsubria.stormbringer.ui.theme.NavigationBarSection
 import pdm.uninsubria.stormbringer.ui.theme.StatControl
 import pdm.uninsubria.stormbringer.ui.theme.stormbringer_background_dark
 import pdm.uninsubria.stormbringer.ui.theme.stormbringer_primary
+import pdm.uninsubria.stormbringer.ui.theme.stormbringer_surface_dark
+import pdm.uninsubria.stormbringer.ui.theme.white_20
 import pdm.uninsubria.stormbringer.ui.theme.white_70
 
 @Composable
@@ -92,7 +95,7 @@ fun StormbringerCharacterEditActivity() {
         }
     }
 
-    fun updateField(field: String, value: Any, newCharState: Character ) {
+    fun updateField(field: String, value: Any, newCharState: Character) {
         character = newCharState
         scope.launch {
             changeCharInfo(
@@ -117,7 +120,7 @@ fun StormbringerCharacterEditActivity() {
         headLine = stringResource(R.string.charcater_edit_title),
         currentTab = 1,
         floatingActionButton = {
-            if(!isLoading && character != null){
+            if (!isLoading && character != null) {
                 if (!visibilityMod) {
 
                     FloatingActionButton(
@@ -129,7 +132,8 @@ fun StormbringerCharacterEditActivity() {
                         shape = CircleShape
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.edit_24px), contentDescription = "Edit"
+                            painter = painterResource(R.drawable.edit_24px),
+                            contentDescription = "Edit"
                         )
                     }
                 } else {
@@ -209,7 +213,7 @@ fun StormbringerCharacterEditActivity() {
                                     showSourceDialog = false
                                     scope.launch {
                                         isLoading = true
-                                        if(currentChar.bio.isEmpty()){
+                                        if (currentChar.bio.isEmpty()) {
                                             //fail the generation if no bio is present
                                             Toast.makeText(
                                                 context,
@@ -223,8 +227,7 @@ fun StormbringerCharacterEditActivity() {
                                         loadAllData()
 
                                     }
-                                }
-                            )
+                                })
                         }
 
                         Column(
@@ -252,7 +255,7 @@ fun StormbringerCharacterEditActivity() {
                             )
 
                             //show if is dead
-                            if(currentChar.isDead()){
+                            if (currentChar.isDead()) {
                                 Text(
                                     text = "DEAD",
                                     style = MaterialTheme.typography.bodyMedium,
@@ -280,71 +283,96 @@ fun StormbringerCharacterEditActivity() {
                             Spacer(modifier = Modifier.height(24.dp))
 
 
-                            ExperienceBar(currentChar.xp, currentChar.getLevel())
+                            ExperienceBar(currentXp = {
+                                currentChar.xp
+                            }, level = {
+                                currentChar.getLevel()
+                            })
 
-                            //add double button to increase/decrease XP by 10 and 100
+
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 32.dp, vertical = 8.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                ControlButton(
-                                    text = "-100 XP",
-                                    currentValue = 0,
-                                    maxValue = 0,
-                                    visibility = visibilityMod,
-                                    onChange = {
+
+
+                                Button(
+                                    onClick = {
                                         val newXp = (currentChar.xp - 100).coerceAtLeast(0)
                                         updateField(
-                                            "xp",
-                                            newXp,
-                                            character!!.copy(xp = newXp)
+                                            "xp", newXp, character!!.copy(xp = newXp)
                                         )
-                                    }
-                                )
-                                ControlButton(
-                                    text = "-10 XP",
-                                    currentValue = 0,
-                                    maxValue = 0,
-                                    visibility = visibilityMod,
-                                    onChange = {
+                                    },
+                                    enabled = visibilityMod,
+                                    shape = CircleShape,
+                                ) {
+                                    Text(
+                                        text = "-100 xp",
+                                        color = if (visibilityMod) stormbringer_surface_dark else stormbringer_surface_dark
+                                    )
+                                }
+
+                                Button(
+                                    onClick = {
                                         val newXp = (currentChar.xp - 10).coerceAtLeast(0)
                                         updateField(
-                                            "xp",
-                                            newXp,
-                                            character!!.copy(xp = newXp)
+                                            "xp", newXp, character!!.copy(xp = newXp)
                                         )
-                                    }
-                                )
-                                ControlButton(
-                                    text = "+10 XP",
-                                    currentValue = 0,
-                                    maxValue = 0,
-                                    visibility = visibilityMod,
-                                    onChange = {
-                                        val newXp = currentChar.xp + 10
-                                        updateField(
-                                            "xp",
-                                            newXp,
-                                            character!!.copy(xp = newXp)
-                                        )
-                                    }
-                                )
-                                ControlButton(
-                                    text = "+100 XP",
-                                    currentValue = 0,
-                                    maxValue = 0,
-                                    visibility = visibilityMod,
-                                    onChange = {
+                                    },
+                                    enabled = visibilityMod,
+                                    shape = CircleShape,
+                                ) {
+                                    Text(
+                                        text = "-10 xp",
+                                        color = if (visibilityMod) stormbringer_surface_dark else stormbringer_surface_dark
+                                    )
+                                }
+
+
+                            }
+
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 32.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Button(
+                                    onClick = {
                                         val newXp = currentChar.xp + 100
                                         updateField(
-                                            "xp",
-                                            newXp,
-                                            character!!.copy(xp = newXp)
+                                            "xp", newXp, character!!.copy(xp = newXp)
                                         )
-                                    }
-                                )
+                                    },
+                                    enabled = visibilityMod,
+                                    shape = CircleShape,
+                                ) {
+                                    Text(
+                                        text = "+100 xp",
+                                        color = if (visibilityMod) stormbringer_surface_dark else stormbringer_surface_dark
+                                    )
+                                }
+
+                                Button(
+                                    onClick = {
+                                        val newXp = currentChar.xp + 10
+                                        updateField(
+                                            "xp", newXp, character!!.copy(xp = newXp)
+                                        )
+                                    },
+                                    enabled = visibilityMod,
+                                    shape = CircleShape,
+                                ) {
+                                    Text(
+                                        text = "+10 xp",
+                                        color = if (visibilityMod) stormbringer_surface_dark else stormbringer_surface_dark
+                                    )
+                                }
+
+
                             }
 
 
@@ -355,7 +383,9 @@ fun StormbringerCharacterEditActivity() {
                                 text = "Attributes",
                                 style = MaterialTheme.typography.titleMedium,
                                 color = white_70,
-                                modifier = Modifier.align(Alignment.Start).padding(start = 16.dp, bottom = 8.dp)
+                                modifier = Modifier
+                                    .align(Alignment.Start)
+                                    .padding(start = 16.dp, bottom = 8.dp)
                             )
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -366,29 +396,89 @@ fun StormbringerCharacterEditActivity() {
                                     currentValue = currentChar.hp,
                                     maxValue = 100,
                                     visibility = visibilityMod,
-                                    onChange = { updateField("hp", it, newCharState = character!!.copy(hp=it) ) }
-                                )
+                                    onChange = {
+                                        updateField(
+                                            "hp",
+                                            it,
+                                            newCharState = character!!.copy(hp = it)
+                                        )
+                                    })
                                 ControlButton(
                                     text = "MP",
                                     currentValue = currentChar.mp,
                                     maxValue = 100,
                                     visibility = visibilityMod,
-                                    onChange = { updateField("mp", it,newCharState = character!!.copy(mp=it)) }
-                                )
+                                    onChange = {
+                                        updateField(
+                                            "mp",
+                                            it,
+                                            newCharState = character!!.copy(mp = it)
+                                        )
+                                    })
                             }
 
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    StatControl("STR", currentChar.strength, visibilityMod) { updateField("strength", it, character!!.copy(strength = it)) }
-                                    StatControl("DEX", currentChar.dexterity, visibilityMod) { updateField("dexterity", it, character!!.copy(dexterity = it)) }
-                                    StatControl("INT", currentChar.intelligence, visibilityMod) { updateField("intelligence", it, character!!.copy(intelligence = it)) }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    StatControl(
+                                        "STR",
+                                        currentChar.strength,
+                                        visibilityMod
+                                    ) {
+                                        updateField(
+                                            "strength",
+                                            it,
+                                            character!!.copy(strength = it)
+                                        )
+                                    }
+                                    StatControl(
+                                        "DEX",
+                                        currentChar.dexterity,
+                                        visibilityMod
+                                    ) {
+                                        updateField(
+                                            "dexterity",
+                                            it,
+                                            character!!.copy(dexterity = it)
+                                        )
+                                    }
+                                    StatControl(
+                                        "INT",
+                                        currentChar.intelligence,
+                                        visibilityMod
+                                    ) {
+                                        updateField(
+                                            "intelligence",
+                                            it,
+                                            character!!.copy(intelligence = it)
+                                        )
+                                    }
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
-                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                                    StatControl("WIS", currentChar.wisdom, visibilityMod) { updateField("wisdom", it, character!!.copy(wisdom = it)) }
-                                    StatControl("CHA", currentChar.charisma, visibilityMod) { updateField("charisma", it, character!!.copy(charisma = it)) }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    StatControl(
+                                        "WIS",
+                                        currentChar.wisdom,
+                                        visibilityMod
+                                    ) { updateField("wisdom", it, character!!.copy(wisdom = it)) }
+                                    StatControl(
+                                        "CHA",
+                                        currentChar.charisma,
+                                        visibilityMod
+                                    ) {
+                                        updateField(
+                                            "charisma",
+                                            it,
+                                            character!!.copy(charisma = it)
+                                        )
+                                    }
                                 }
                             }
 
@@ -398,11 +488,15 @@ fun StormbringerCharacterEditActivity() {
                                 BiographyText(
                                     bio = currentChar.bio,
                                     isEditable = visibilityMod,
-                                    onBioChange = { updateField("bio", it, character!!.copy(bio = it)) }
-                                )
+                                    onBioChange = {
+                                        updateField(
+                                            "bio",
+                                            it,
+                                            character!!.copy(bio = it)
+                                        )
+                                    })
                             }
                         }
-
 
 
                     }

@@ -52,8 +52,7 @@ fun StormbringerCharacterCreation() {
         val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
-                .padding(16.dp)
-                .verticalScroll(scrollState),
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {

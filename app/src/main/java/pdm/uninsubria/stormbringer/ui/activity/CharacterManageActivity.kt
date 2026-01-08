@@ -112,77 +112,85 @@ fun StormbringerCharacterManage() {
             }
         },
         content = { paddingValues ->
+            Column(
+                modifier = Modifier.padding(paddingValues).verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(color = stormbringer_primary)
+                } else {
 
-            if (isLoading) {
-                CircularProgressIndicator(color = stormbringer_primary)
-            } else {
-                Column(
-                    modifier = Modifier.padding(paddingValues).verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    if (characters.isNotEmpty()) {
-                        LazyColumn(
-                            modifier = Modifier,
+                        if (characters.isNotEmpty()) {
+                            LazyColumn(
+                                modifier = Modifier,
 
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            contentPadding = PaddingValues(16.dp)
-                        ) {
-                            items(characters) { character ->
-                                val isSelected = (character.id == selectedCharacterId)
-                                ButtonInfoCharacter(
-                                    character = character, isSelected = isSelected, onClick = {
-                                        val newId = if (isSelected) "" else character.id
-                                        selectedCharacterId = newId
-                                        scope.launch {
-                                            val userPrefs = UserPreferences(context)
-                                            userPrefs.savePreferencesString(
-                                                key = "character_id", value = newId
-                                            )
-                                            Log.i("Selection", "Salvato ID: $newId")
-                                        }
-                                    }, showEdit = editMode, onEdit = {
-                                        scope.launch {
-                                            deleteCharacter(db = db, userUid = auth.uid!!, characterId = character.id)
-                                            Log.i("CharacterManageActivity", "Deleted character: ${character.id}")
-                                            isLoading = true
-                                            loadData()
-                                        }
-                                    })
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                contentPadding = PaddingValues(16.dp)
+                            ) {
+                                items(characters) { character ->
+                                    val isSelected = (character.id == selectedCharacterId)
+                                    ButtonInfoCharacter(
+                                        character = character, isSelected = isSelected, onClick = {
+                                            val newId = if (isSelected) "" else character.id
+                                            selectedCharacterId = newId
+                                            scope.launch {
+                                                val userPrefs = UserPreferences(context)
+                                                userPrefs.savePreferencesString(
+                                                    key = "character_id", value = newId
+                                                )
+                                                Log.i("Selection", "Salvato ID: $newId")
+                                            }
+                                        }, showEdit = editMode, onEdit = {
+                                            scope.launch {
+                                                deleteCharacter(
+                                                    db = db,
+                                                    userUid = auth.uid!!,
+                                                    characterId = character.id
+                                                )
+                                                Log.i(
+                                                    "CharacterManageActivity",
+                                                    "Deleted character: ${character.id}"
+                                                )
+                                                isLoading = true
+                                                loadData()
+                                            }
+                                        })
+                                }
                             }
+                        } else {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center,
+                                modifier = Modifier.padding(
+                                    16.dp
+                                )
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.no_characters_message),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = stormbringer_primary,
+                                )
+                            }
+
                         }
-                    } else {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
-                            modifier = Modifier.padding(
-                                16.dp
-                            )
-                        ) {
-                            Text(
-                                text = stringResource(R.string.no_characters_message),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = stormbringer_primary,
-                            )
-                        }
+
+                        ButtonActionPrimary(
+                            onClick = {
+                                activity?.supportFragmentManager?.beginTransaction()
+                                    ?.setReorderingAllowed(true)
+                                    ?.replace(R.id.fragment_container, CharacterCreationFragment())
+                                    ?.addToBackStack(null)?.commit()
+                            },
+                            id = R.string.create_character_button,
+                            conditionEnable = true,
+                            iconID = R.drawable.add_24px
+                        )
 
                     }
-
-                    ButtonActionPrimary(
-                        onClick = {
-                            activity?.supportFragmentManager?.beginTransaction()
-                                ?.setReorderingAllowed(true)
-                                ?.replace(R.id.fragment_container, CharacterCreationFragment())
-                                ?.addToBackStack(null)?.commit()
-                        },
-                        id = R.string.create_character_button,
-                        conditionEnable = true,
-                        iconID = R.drawable.add_24px
-                    )
-
                 }
-            }
+
 
 
         })

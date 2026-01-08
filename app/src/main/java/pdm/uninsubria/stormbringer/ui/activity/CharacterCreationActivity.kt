@@ -43,7 +43,7 @@ fun StormbringerCharacterCreation() {
     Surface(
         modifier = Modifier
             .fillMaxSize()
-            .imePadding(), color = stormbringer_background_dark
+            .imePadding().verticalScroll(rememberScrollState()), color = stormbringer_background_dark
     ) {
         val db = remember { FirebaseFirestore.getInstance() }
         remember { FirebaseAuth.getInstance() }

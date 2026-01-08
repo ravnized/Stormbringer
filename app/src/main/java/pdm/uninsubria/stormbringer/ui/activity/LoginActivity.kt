@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -40,7 +42,7 @@ import pdm.uninsubria.stormbringer.ui.theme.ValidationError
 @Composable
 fun StormbringerLogin() {
     Surface(
-        modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()), color = MaterialTheme.colorScheme.background,
     ) {
         val context = LocalContext.current
         val userAction = remember { UserAction(context) }

@@ -196,7 +196,8 @@ fun StormbringerCharacterEditActivity() {
                                     scope.launch {
                                         isLoading = true
                                         generateCharacterImage(db, userUid, currentChar)
-                                        isLoading = false
+                                        loadAllData()
+
                                     }
                                 }
                             )

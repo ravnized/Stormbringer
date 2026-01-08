@@ -1,7 +1,6 @@
 package pdm.uninsubria.stormbringer.ui.activity
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -47,7 +46,6 @@ import androidx.fragment.app.FragmentActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.selects.select
 import pdm.uninsubria.stormbringer.R
 import pdm.uninsubria.stormbringer.tools.Character
 import pdm.uninsubria.stormbringer.tools.Party
@@ -57,9 +55,8 @@ import pdm.uninsubria.stormbringer.tools.createParty
 import pdm.uninsubria.stormbringer.tools.deleteParty
 import pdm.uninsubria.stormbringer.tools.getCharacterById
 import pdm.uninsubria.stormbringer.tools.loadMultiplePartyInfoByGM
-import pdm.uninsubria.stormbringer.tools.loadPartyInfo
 import pdm.uninsubria.stormbringer.tools.loadPartyInfoByCharacter
-import pdm.uninsubria.stormbringer.ui.fragments.PartyManageFragment
+import pdm.uninsubria.stormbringer.tools.removeMemberFromParty
 import pdm.uninsubria.stormbringer.ui.theme.AlertDialogRegister
 import pdm.uninsubria.stormbringer.ui.theme.ButtonActionPrimary
 import pdm.uninsubria.stormbringer.ui.theme.ButtonInfoCharacter
@@ -93,28 +90,36 @@ fun StormbringerPartyActivity() {
     var showRoll by remember { mutableStateOf(false) }
     var selectedSidesRoll by remember { mutableIntStateOf(6) }
     var showSides by remember { mutableStateOf(false) }
-    fun loadData(){
+    var characterId by remember { mutableStateOf("") }
+    val userUid = auth.currentUser?.uid ?: ""
+    fun loadData() {
         scope.launch {
-            val characterId = userPreferences.getPreferencesString("character_id")
+            characterId = userPreferences.getPreferencesString("character_id")
             val savedMode = userPreferences.getPreferencesString("player_mode")
             if (characterId.isNotEmpty() && savedMode != "GM") {
                 val loadedParty = loadPartyInfoByCharacter(db = db, characterId = characterId)
                 if (loadedParty != null) {
                     party = loadedParty
-                }
-                Log.i("PartyActivity", "Loaded party for character $characterId: ${party.id}")
+                    Log.i("PartyActivity", "Loaded party for character $characterId: ${party.id}")
 
-                if (savedMode.isNotEmpty()) {
-                    mode = savedMode
+                    if (savedMode.isNotEmpty()) {
+                        mode = savedMode
+                    }
+
+                    charactersInParty = party.members.mapNotNull { memberId ->
+                        getCharacterById(db = db, characterId = memberId)
+                    }
+
+                    showTextSelect = false
+                } else {
+                    Log.e("PartyActivity", "No party found for character $characterId")
+                    party = Party()
+                    isLoading = false
+                    return@launch
                 }
 
-                charactersInParty = party.members.mapNotNull { memberId ->
-                    getCharacterById(db = db, characterId = memberId)
-                }
-
-                showTextSelect = false
             } else if (savedMode == "GM") {
-                val userUid = auth.currentUser?.uid ?: ""
+
                 parties = loadMultiplePartyInfoByGM(db = db, userUid = userUid)
                 Log.i("PartyActivity", "Loaded parties for GM: ${parties.size}")
                 mode = "GM"
@@ -136,7 +141,7 @@ fun StormbringerPartyActivity() {
 
 
     NavigationBarSection(headLine = stringResource(R.string.party_title), floatingActionButton = {
-        if(mode=="GM") {
+        if (mode == "GM") {
             FloatingActionButton(
                 onClick = {
                     //edit party
@@ -147,11 +152,12 @@ fun StormbringerPartyActivity() {
                 shape = CircleShape
             ) {
 
-                if(showEdit){
+                if (showEdit) {
                     Icon(
-                        painter = painterResource(R.drawable.check_24px), contentDescription = "confirm"
+                        painter = painterResource(R.drawable.check_24px),
+                        contentDescription = "confirm"
                     )
-                }else{
+                } else {
                     Icon(
                         painter = painterResource(R.drawable.edit_24px), contentDescription = "edit"
                     )
@@ -159,7 +165,7 @@ fun StormbringerPartyActivity() {
 
 
             }
-        }else{
+        } else {
             FloatingActionButton(
                 onClick = {
                     //edit party
@@ -196,7 +202,7 @@ fun StormbringerPartyActivity() {
                         loadData()
                     })
                     ButtonActionPrimary(
-                        onClick = {showSheet = true},
+                        onClick = { showSheet = true },
                         id = R.string.add_party_button,
                         conditionEnable = true
                     )
@@ -211,9 +217,25 @@ fun StormbringerPartyActivity() {
                             textAlign = TextAlign.Center
                         )
                     } else {
-                        PlayerScreen(partyId = party.id, partyInfo = party, characters = charactersInParty, onAddPartyClick = {
-                            loadData()
-                        })
+                        PlayerScreen(
+                            partyId = party.id,
+                            partyInfo = party,
+                            characters = charactersInParty,
+                            onAddPartyClick = {
+                                isLoading = true
+                                loadData()
+                            },
+                            onRemovePartyClick = {
+                                isLoading = true
+                                scope.launch {
+                                    removeMemberFromParty(
+                                        db = db,
+                                        partyId = party.id,
+                                        memberId = characterId
+                                    )
+                                    loadData()
+                                }
+                            })
                     }
 
                 }
@@ -223,48 +245,48 @@ fun StormbringerPartyActivity() {
 
 
 
-        CustomBottomSheet(
-            isVisible = showSides, onDismiss = { showSides = false }) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp)
-                    .imePadding()
-            ) {
-                Text(
-                    text = stringResource(R.string.select_dice_sides),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = stormbringer_primary,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
+    CustomBottomSheet(
+        isVisible = showSides, onDismiss = { showSides = false }) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp)
+                .imePadding()
+        ) {
+            Text(
+                text = stringResource(R.string.select_dice_sides),
+                style = MaterialTheme.typography.headlineSmall,
+                color = stormbringer_primary,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
 
-                val sidesOptions = listOf(4, 6, 8, 10, 12, 20, 100)
+            val sidesOptions = listOf(4, 6, 8, 10, 12, 20, 100)
 
-                sidesOptions.forEach { sides ->
-                    Button(
-                        onClick = {
-                            selectedSidesRoll = sides
-                            showSides = false
-                            showRoll = true
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = stormbringer_primary),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                    ) {
-                        Text("D$sides", color = Color.Black)
-                    }
+            sidesOptions.forEach { sides ->
+                Button(
+                    onClick = {
+                        selectedSidesRoll = sides
+                        showSides = false
+                        showRoll = true
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = stormbringer_primary),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                ) {
+                    Text("D$sides", color = Color.Black)
                 }
             }
         }
+    }
 
 
-        if(showRoll) {
-            DiceRollDialog(
-                sides = selectedSidesRoll,
-                onDismiss = { showRoll = false }
-            )
-        }
+    if (showRoll) {
+        DiceRollDialog(
+            sides = selectedSidesRoll,
+            onDismiss = { showRoll = false }
+        )
+    }
 
 
 
@@ -303,7 +325,7 @@ fun GameMasterScreen(parties: List<Party>, editEnable: Boolean = false, loadData
     Log.i("PartyActivity", "Rendering GameMasterScreen with ${parties.size} parties")
     var currentPartyId by remember { mutableStateOf("") }
     LaunchedEffect(Unit) {
-        currentPartyId  = UserPreferences(context).getPreferencesString("current_party_id")
+        currentPartyId = UserPreferences(context).getPreferencesString("current_party_id")
     }
 
 
@@ -319,11 +341,11 @@ fun GameMasterScreen(parties: List<Party>, editEnable: Boolean = false, loadData
             ButtonInfoParty(
                 party = party, onClick = {
                     scope.launch {
-                            UserPreferences(context).savePreferencesString(
-                                key = "current_party_id",
-                                value = if(isSelected) "" else party.id
-                            )
-                        currentPartyId = if(isSelected) "" else party.id
+                        UserPreferences(context).savePreferencesString(
+                            key = "current_party_id",
+                            value = if (isSelected) "" else party.id
+                        )
+                        currentPartyId = if (isSelected) "" else party.id
 
                     }
 
@@ -338,9 +360,6 @@ fun GameMasterScreen(parties: List<Party>, editEnable: Boolean = false, loadData
                 })
         }
     }
-
-
-
 
 
 }
@@ -401,7 +420,13 @@ fun CreatePartyForm(onCancel: () -> Unit, onClick: (String) -> Unit) {
 }
 
 @Composable
-fun PlayerScreen(partyId: String = "" , partyInfo: Party = Party(), characters: List<Character> = emptyList(), onAddPartyClick: () -> Unit) {
+fun PlayerScreen(
+    partyId: String = "",
+    partyInfo: Party = Party(),
+    characters: List<Character> = emptyList(),
+    onAddPartyClick: () -> Unit,
+    onRemovePartyClick: () -> Unit = {}
+) {
     val scope = rememberCoroutineScope()
     val partycode = rememberTextFieldState(initialText = "")
     val context = LocalContext.current
@@ -520,6 +545,13 @@ fun PlayerScreen(partyId: String = "" , partyInfo: Party = Party(), characters: 
                         character = character, isSelected = isSelected, onClick = {})
                 }
             }
+
+            ButtonActionPrimary(
+                onClick = onRemovePartyClick,
+                id = R.string.leave_party_button,
+                conditionEnable = true,
+                iconID = R.drawable.logout_24px
+            )
         }
     }
 }

@@ -152,7 +152,7 @@ fun ButtonInfoCharacter(
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.remove_24px),
-                        contentDescription = "Remove Character from Party",
+                        contentDescription = "Remove Character",
                         tint = white_50,
                         modifier = Modifier.size(24.dp)
                     )
@@ -178,7 +178,7 @@ fun ButtonInfoParty(
     party: Party = Party(name = "Fellowship"),
     isSelected: Boolean = false,
     editEnable : Boolean = false,
-    onClickDelete: () -> Unit = {}
+    onClickDelete: () -> Unit = {},
 ) {
 
     val borderStroke = if (isSelected) {
@@ -269,7 +269,8 @@ fun ButtonInfoParty(
 fun ButtonActionPrimary(
     onClick: () -> Unit = {},
     id: Int = R.string.login_button,
-    conditionEnable: Boolean = true
+    conditionEnable: Boolean = true,
+    iconID: Int? = null
 ) {
     Box(
         modifier = Modifier
@@ -300,12 +301,27 @@ fun ButtonActionPrimary(
                     onClick()
 
                 }, modifier = Modifier.padding(), content = {
-                    Text(
-                        text = stringResource(id),
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = stormbringer_surface_dark,
-                        modifier = Modifier.padding(16.dp)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        if(iconID != null){
+                            Icon(
+                                painter = painterResource(id = iconID),
+                                contentDescription = "Icon",
+                                tint = stormbringer_background_dark,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+
+                        Text(
+                            text = stringResource(id),
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = stormbringer_surface_dark,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+
                 })
         })
 }

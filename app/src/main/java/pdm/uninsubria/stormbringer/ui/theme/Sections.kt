@@ -25,7 +25,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,7 +62,7 @@ fun SelectorMode() {
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        UserPreferences(context).savePreferencesString(key = "player_mode",value = modeSelected)
+        UserPreferences(context).savePreferencesString(key = "player_mode", value = modeSelected)
         Log.i("UI", "Modalità caricata: $modeSelected")
     }
 
@@ -174,28 +173,38 @@ fun NavigationBarSection(
                 if (gameMode == "PLAYER") {
                     NavigationBarItem(
                         selected = currentTab == 0, onClick = {
-                        if (currentTab != 0) {
-                            activity?.supportFragmentManager?.beginTransaction()
-                                ?.setReorderingAllowed(true)
-                                ?.replace(R.id.fragment_container, CharacterManageFragment())
-                                ?.addToBackStack(null)?.commit()
-                        }
-                    }, icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.domino_mask_24px),
-                            contentDescription = "Heroes"
+                            if (currentTab != 0) {
+                                activity?.supportFragmentManager?.beginTransaction()?.setCustomAnimations(
+                                    android.R.anim.fade_in,
+                                    android.R.anim.fade_out,
+                                    android.R.anim.fade_in,
+                                    android.R.anim.fade_out
+                                )
+                                    ?.setReorderingAllowed(true)
+                                    ?.replace(R.id.fragment_container, CharacterManageFragment())
+                                    ?.addToBackStack(null)?.commit()
+                            }
+                        }, icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.domino_mask_24px),
+                                contentDescription = "Heroes"
+                            )
+                        }, label = { Text("Heroes") }, colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = stormbringer_primary,
+                            indicatorColor = stormbringer_primary.copy(alpha = 0.2f)
                         )
-                    }, label = { Text("Heroes") }, colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = stormbringer_primary,
-                        indicatorColor = stormbringer_primary.copy(alpha = 0.2f)
-                    )
                     )
 
                     NavigationBarItem(
                         selected = currentTab == 1,
                         onClick = {
                             if (currentTab != 1) {
-                                activity?.supportFragmentManager?.beginTransaction()
+                                activity?.supportFragmentManager?.beginTransaction()?.setCustomAnimations(
+                                    android.R.anim.fade_in,
+                                    android.R.anim.fade_out,
+                                    android.R.anim.fade_in,
+                                    android.R.anim.fade_out
+                                )
                                     ?.setReorderingAllowed(true)
                                     ?.replace(R.id.fragment_container, CharacterEditFragment())
                                     ?.addToBackStack(null)?.commit()
@@ -216,28 +225,38 @@ fun NavigationBarSection(
 
                     NavigationBarItem(
                         selected = currentTab == 2, onClick = {
-                        if (currentTab != 2) {
-                            activity?.supportFragmentManager?.beginTransaction()
-                                ?.setReorderingAllowed(true)
-                                ?.replace(R.id.fragment_container, PartyManagerFragment())
-                                ?.addToBackStack(null)?.commit()
-                        }
-                    }, icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.sailing_24px),
-                            contentDescription = "Party"
+                            if (currentTab != 2) {
+                                activity?.supportFragmentManager?.beginTransaction()?.setCustomAnimations(
+                                    android.R.anim.fade_in,
+                                    android.R.anim.fade_out,
+                                    android.R.anim.fade_in,
+                                    android.R.anim.fade_out
+                                )
+                                    ?.setReorderingAllowed(true)
+                                    ?.replace(R.id.fragment_container, PartyManagerFragment())
+                                    ?.addToBackStack(null)?.commit()
+                            }
+                        }, icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.sailing_24px),
+                                contentDescription = "Party"
+                            )
+                        }, label = { Text("Party") }, colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = stormbringer_primary,
+                            indicatorColor = stormbringer_primary.copy(alpha = 0.2f)
                         )
-                    }, label = { Text("Party") }, colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = stormbringer_primary,
-                        indicatorColor = stormbringer_primary.copy(alpha = 0.2f)
-                    )
                     )
                 } else if (gameMode == "GM") {
                     NavigationBarItem(
                         selected = currentTab == 0,
                         onClick = {
                             if (currentTab != 0) {
-                                activity?.supportFragmentManager?.beginTransaction()
+                                activity?.supportFragmentManager?.beginTransaction()?.setCustomAnimations(
+                                    android.R.anim.fade_in,
+                                    android.R.anim.fade_out,
+                                    android.R.anim.fade_in,
+                                    android.R.anim.fade_out
+                                )
                                     ?.setReorderingAllowed(true)
                                     ?.replace(R.id.fragment_container, PartyManagerFragment())
                                     ?.addToBackStack(null)?.commit()
@@ -260,7 +279,12 @@ fun NavigationBarSection(
                         selected = currentTab == 1,
                         onClick = {
                             if (currentTab != 1) {
-                                activity?.supportFragmentManager?.beginTransaction()
+                                activity?.supportFragmentManager?.beginTransaction()?.setCustomAnimations(
+                                    android.R.anim.fade_in,
+                                    android.R.anim.fade_out,
+                                    android.R.anim.fade_in,
+                                    android.R.anim.fade_out
+                                )
                                     ?.setReorderingAllowed(true)
                                     ?.replace(R.id.fragment_container, PartyManageFragment())
                                     ?.addToBackStack(null)?.commit()
@@ -312,7 +336,12 @@ fun NavigationBarSection(
                         activity?.supportFragmentManager?.popBackStack(
                             null, FragmentManager.POP_BACK_STACK_INCLUSIVE
                         )
-                        activity?.supportFragmentManager?.beginTransaction()
+                        activity?.supportFragmentManager?.beginTransaction()?.setCustomAnimations(
+                            android.R.anim.fade_in,
+                            android.R.anim.fade_out,
+                            android.R.anim.fade_in,
+                            android.R.anim.fade_out
+                        )
                             ?.replace(R.id.fragment_container, InitialFragment())?.commit()
                     } else {
                         Log.e("ProfileDialog", "Logout failed")

@@ -67,4 +67,6 @@
     <string name="select_dice_sides">Select Roll Dice</string>
     <string name="result">Result</string>
     <string name="reroll">Reroll</string>
+    <string name="leave_party_button">Leave Party</string>
+    <string name="create_character_button">Create Character</string>
 </resources>

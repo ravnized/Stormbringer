@@ -90,7 +90,7 @@ fun StormbringerCharacterManage() {
         currentTab = 0,
         floatingActionButton = {
 
-            if (characters.isNotEmpty()) {
+            if (characters.isNotEmpty() && !isLoading) {
                 FloatingActionButton(
                     onClick = {
                         editMode = !editMode

@@ -21,7 +21,6 @@ data class Character(
     val id: String = "",
     var name: String = "",
     var characterClass: String = "",
-    var level: Int = 1,
     var isAlive: Boolean = true,
     var xp: Int = 0,
     var image: String = "",
@@ -38,14 +37,21 @@ data class Character(
 ) {
 
 
-    fun isDead() = !isAlive
+    fun isDead(): Boolean = hp <= 0
 
-    fun levelUp() {
-        level++
-    }
-
-    fun levelDown() {
-        if (level > 1) level--
+    fun getLevel(): Int {
+        return when {
+            xp < 100 -> 1
+            xp < 300 -> 2
+            xp < 600 -> 3
+            xp < 1000 -> 4
+            xp < 1500 -> 5
+            xp < 2100 -> 6
+            xp < 2800 -> 7
+            xp < 3600 -> 8
+            xp < 4500 -> 9
+            else -> 10
+        }
     }
 
     fun increaseXp(amount: Int) {

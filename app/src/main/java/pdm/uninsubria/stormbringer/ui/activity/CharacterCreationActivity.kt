@@ -138,7 +138,7 @@ fun StormbringerCharacterCreation() {
                                 Log.e("CharacterCreation", "Error creating character")
                             }
                             //goes back to previous activity
-                            activity?.supportFragmentManager?.beginTransaction()
+                            activity?.supportFragmentManager?.beginTransaction()?.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                                 ?.setReorderingAllowed(true)
                                 ?.replace(R.id.fragment_container, CharacterManageFragment())
                                 ?.commit()
@@ -146,7 +146,7 @@ fun StormbringerCharacterCreation() {
                         }
                     }
 
-                })
+                }, id = R.string.create_character_button)
 
 
         }

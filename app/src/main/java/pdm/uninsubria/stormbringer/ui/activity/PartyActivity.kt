@@ -15,10 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -144,50 +142,57 @@ fun StormbringerPartyActivity() {
 
 
     NavigationBarSection(headLine = stringResource(R.string.party_title), floatingActionButton = {
-        if (mode == "GM") {
-            FloatingActionButton(
-                onClick = {
-                    //edit party
-                    showEdit = !showEdit
-                },
-                containerColor = stormbringer_primary,
-                contentColor = stormbringer_background_dark,
-                shape = CircleShape
-            ) {
 
-                if (showEdit) {
-                    Icon(
-                        painter = painterResource(R.drawable.check_24px),
-                        contentDescription = "confirm"
-                    )
-                } else {
-                    Icon(
-                        painter = painterResource(R.drawable.edit_24px), contentDescription = "edit"
-                    )
-                }
+        if (!isLoading) {
 
 
-            }
-        } else {
-            if(party.id.isNotEmpty()){
+            if (mode == "GM") {
                 FloatingActionButton(
                     onClick = {
                         //edit party
-                        showSides = true
+                        showEdit = !showEdit
                     },
                     containerColor = stormbringer_primary,
                     contentColor = stormbringer_background_dark,
                     shape = CircleShape
                 ) {
 
-                    Icon(
-                        painter = painterResource(R.drawable.casino_24px), contentDescription = "roll"
-                    )
+                    if (showEdit) {
+                        Icon(
+                            painter = painterResource(R.drawable.check_24px),
+                            contentDescription = "confirm"
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(R.drawable.edit_24px),
+                            contentDescription = "edit"
+                        )
+                    }
 
 
                 }
-            }
+            } else {
+                if (party.id.isNotEmpty()) {
+                    FloatingActionButton(
+                        onClick = {
+                            //edit party
+                            showSides = true
+                        },
+                        containerColor = stormbringer_primary,
+                        contentColor = stormbringer_background_dark,
+                        shape = CircleShape
+                    ) {
 
+                        Icon(
+                            painter = painterResource(R.drawable.casino_24px),
+                            contentDescription = "roll"
+                        )
+
+
+                    }
+                }
+
+            }
         }
     }, currentTab = if (mode == "GM") 0 else 2, content = { innerPadding ->
         Column(
@@ -236,9 +241,7 @@ fun StormbringerPartyActivity() {
                                 isLoading = true
                                 scope.launch {
                                     removeMemberFromParty(
-                                        db = db,
-                                        partyId = party.id,
-                                        memberId = characterId
+                                        db = db, partyId = party.id, memberId = characterId
                                     )
                                     loadData()
                                 }
@@ -290,9 +293,7 @@ fun StormbringerPartyActivity() {
 
     if (showRoll) {
         DiceRollDialog(
-            sides = selectedSidesRoll,
-            onDismiss = { showRoll = false }
-        )
+            sides = selectedSidesRoll, onDismiss = { showRoll = false })
     }
 
 
@@ -345,26 +346,23 @@ fun GameMasterScreen(parties: List<Party>, editEnable: Boolean = false, loadData
     ) {
         items(parties) { party ->
             val isSelected = (party.id == currentPartyId)
-            ButtonInfoParty(
-                party = party, onClick = {
-                    scope.launch {
-                        UserPreferences(context).savePreferencesString(
-                            key = "current_party_id",
-                            value = if (isSelected) "" else party.id
-                        )
-                        currentPartyId = if (isSelected) "" else party.id
+            ButtonInfoParty(party = party, onClick = {
+                scope.launch {
+                    UserPreferences(context).savePreferencesString(
+                        key = "current_party_id", value = if (isSelected) "" else party.id
+                    )
+                    currentPartyId = if (isSelected) "" else party.id
 
-                    }
+                }
 
-                }, isSelected = isSelected, editEnable = editEnable, onClickDelete = {
-                    scope.launch {
-                        deleteParty(
-                            db = FirebaseFirestore.getInstance(),
-                            partyId = party.id
-                        )
-                        loadData()
-                    }
-                })
+            }, isSelected = isSelected, editEnable = editEnable, onClickDelete = {
+                scope.launch {
+                    deleteParty(
+                        db = FirebaseFirestore.getInstance(), partyId = party.id
+                    )
+                    loadData()
+                }
+            })
         }
     }
 

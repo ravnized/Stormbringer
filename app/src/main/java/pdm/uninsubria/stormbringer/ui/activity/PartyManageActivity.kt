@@ -88,28 +88,30 @@ fun PartyManageActivity() {
     }
     val message = "${stringResource(R.string.whatsapp_text)}: *${partyInfo.id}*"
     NavigationBarSection(headLine = stringResource(R.string.party_manager), floatingActionButton = {
+            if(partyInfo.id.isNotEmpty() && !contentLoaded){
+                FloatingActionButton(
+                    onClick = {
+                        showEdit = !showEdit
 
-            FloatingActionButton(
-                onClick = {
-                    showEdit = !showEdit
-
-                },
-                containerColor = stormbringer_primary,
-                contentColor = stormbringer_background_dark,
-                shape = CircleShape
-            ) {
-                if(showEdit){
-                    Icon(
-                        painter = painterResource(R.drawable.close_24px),
-                        contentDescription = "Close"
-                    )
-                } else {
-                    Icon(
-                        painter = painterResource(R.drawable.edit_24px),
-                        contentDescription = "edit"
-                    )
+                    },
+                    containerColor = stormbringer_primary,
+                    contentColor = stormbringer_background_dark,
+                    shape = CircleShape
+                ) {
+                    if(showEdit){
+                        Icon(
+                            painter = painterResource(R.drawable.close_24px),
+                            contentDescription = "Close"
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(R.drawable.edit_24px),
+                            contentDescription = "edit"
+                        )
+                    }
                 }
             }
+
 
     }, currentTab = 1, content = { innerPadding ->
 

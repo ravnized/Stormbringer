@@ -117,35 +117,39 @@ fun StormbringerCharacterEditActivity() {
         headLine = stringResource(R.string.charcater_edit_title),
         currentTab = 1,
         floatingActionButton = {
-            if (!visibilityMod) {
+            if(!isLoading && character != null){
+                if (!visibilityMod) {
 
-                FloatingActionButton(
-                    onClick = {
-                        visibilityMod = true
-                    },
-                    containerColor = stormbringer_primary,
-                    contentColor = stormbringer_background_dark,
-                    shape = CircleShape
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.edit_24px), contentDescription = "Edit"
-                    )
-                }
-            } else {
-                FloatingActionButton(
-                    onClick = {
-                        visibilityMod = false
-                    },
-                    containerColor = stormbringer_primary,
-                    contentColor = stormbringer_background_dark,
-                    shape = CircleShape
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.check_24px),
-                        contentDescription = "Save"
-                    )
+                    FloatingActionButton(
+                        onClick = {
+                            visibilityMod = true
+                        },
+                        containerColor = stormbringer_primary,
+                        contentColor = stormbringer_background_dark,
+                        shape = CircleShape
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.edit_24px), contentDescription = "Edit"
+                        )
+                    }
+                } else {
+                    FloatingActionButton(
+                        onClick = {
+                            visibilityMod = false
+                        },
+                        containerColor = stormbringer_primary,
+                        contentColor = stormbringer_background_dark,
+                        shape = CircleShape
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.check_24px),
+                            contentDescription = "Save"
+                        )
+                    }
                 }
             }
+
+
         },
         content = { innerPadding ->
             Column(
@@ -247,10 +251,21 @@ fun StormbringerCharacterEditActivity() {
                                 modifier = Modifier.padding(top = 16.dp)
                             )
 
+                            //show if is dead
+                            if(currentChar.isDead()){
+                                Text(
+                                    text = "DEAD",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.error,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                            }
+
 
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = "Lvl. ${currentChar.level}",
+                                    text = "Lvl. ${currentChar.getLevel()}",
                                     style = MaterialTheme.typography.titleMedium,
                                     color = white_70,
                                     fontWeight = FontWeight.Bold
@@ -265,7 +280,74 @@ fun StormbringerCharacterEditActivity() {
                             Spacer(modifier = Modifier.height(24.dp))
 
 
-                            ExperienceBar(currentChar.xp, currentChar.level)
+                            ExperienceBar(currentChar.xp, currentChar.getLevel())
+
+                            //add double button to increase/decrease XP by 10 and 100
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 32.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                ControlButton(
+                                    text = "-100 XP",
+                                    currentValue = 0,
+                                    maxValue = 0,
+                                    visibility = visibilityMod,
+                                    onChange = {
+                                        val newXp = (currentChar.xp - 100).coerceAtLeast(0)
+                                        updateField(
+                                            "xp",
+                                            newXp,
+                                            character!!.copy(xp = newXp)
+                                        )
+                                    }
+                                )
+                                ControlButton(
+                                    text = "-10 XP",
+                                    currentValue = 0,
+                                    maxValue = 0,
+                                    visibility = visibilityMod,
+                                    onChange = {
+                                        val newXp = (currentChar.xp - 10).coerceAtLeast(0)
+                                        updateField(
+                                            "xp",
+                                            newXp,
+                                            character!!.copy(xp = newXp)
+                                        )
+                                    }
+                                )
+                                ControlButton(
+                                    text = "+10 XP",
+                                    currentValue = 0,
+                                    maxValue = 0,
+                                    visibility = visibilityMod,
+                                    onChange = {
+                                        val newXp = currentChar.xp + 10
+                                        updateField(
+                                            "xp",
+                                            newXp,
+                                            character!!.copy(xp = newXp)
+                                        )
+                                    }
+                                )
+                                ControlButton(
+                                    text = "+100 XP",
+                                    currentValue = 0,
+                                    maxValue = 0,
+                                    visibility = visibilityMod,
+                                    onChange = {
+                                        val newXp = currentChar.xp + 100
+                                        updateField(
+                                            "xp",
+                                            newXp,
+                                            character!!.copy(xp = newXp)
+                                        )
+                                    }
+                                )
+                            }
+
+
 
                             Spacer(modifier = Modifier.height(24.dp))
 
